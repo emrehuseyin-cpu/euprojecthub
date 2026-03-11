@@ -18,6 +18,7 @@ import ReactMarkdown from 'react-markdown';
 import { ActivityInlineForm } from '../../components/forms/ActivityInlineForm';
 import { ParticipantInlineForm } from '../../components/forms/ParticipantInlineForm';
 import { BudgetInlineForm } from '../../components/forms/BudgetInlineForm';
+import { SlideOver } from '../../components/SlideOver';
 
 const COLORS = ['#4F6EF7', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
@@ -750,8 +751,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 </main>
             </div>
 
-            {/* ─── MODALS ─── */}
-            <Modal open={modal === 'activity'} onClose={() => setModal(null)} title="Yeni Faaliyet Ekle">
+            {/* ─── SLIDE-OVERS (PREMIUM UI) ─── */}
+            <SlideOver
+                open={modal === 'activity'}
+                onClose={() => setModal(null)}
+                title="Yeni Faaliyet"
+                description="Projeniz için yeni bir faaliyet veya etkinlik tanımlayın."
+            >
                 <ActivityInlineForm
                     projectId={id}
                     onCancel={() => setModal(null)}
@@ -760,8 +766,14 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                         loadTabData('activities');
                     }}
                 />
-            </Modal>
-            <Modal open={modal === 'participant'} onClose={() => setModal(null)} title="Yeni Katılımcı Ekle">
+            </SlideOver>
+
+            <SlideOver
+                open={modal === 'participant'}
+                onClose={() => setModal(null)}
+                title="Yeni Katılımcı"
+                description="Faaliyetlerinize katılan yeni bir kişiyi sisteme kaydedin."
+            >
                 <ParticipantInlineForm
                     projectId={id}
                     onCancel={() => setModal(null)}
@@ -770,8 +782,14 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                         loadTabData('participants');
                     }}
                 />
-            </Modal>
-            <Modal open={modal === 'budget'} onClose={() => setModal(null)} title="Yeni Harcama Kaydı">
+            </SlideOver>
+
+            <SlideOver
+                open={modal === 'budget'}
+                onClose={() => setModal(null)}
+                title="Yeni Harcama Kaydı"
+                description="Gerçekleşen proje harcamalarınızı ve faturalarınızı girin."
+            >
                 <BudgetInlineForm
                     projectId={id}
                     onCancel={() => setModal(null)}
@@ -780,7 +798,9 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                         loadTabData('budget');
                     }}
                 />
-            </Modal>
+            </SlideOver>
+
+            {/* ─── REMAINING MODALS ─── */}
             <Modal open={modal === 'partner'} onClose={() => setModal(null)} title="Add Partner">
                 <p className="text-sm text-gray-500 mb-4">Add a new partner organization.</p>
                 <Link href={`/partners/new?project_id=${id}`}
