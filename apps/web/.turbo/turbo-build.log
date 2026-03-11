@@ -1,0 +1,77 @@
+
+
+> euprojecthub@0.1.0 build
+> next build
+
+[1m[38;2;173;127;168m▲ Next.js 16.1.6[39m[22m (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  · clientTraceMetadata
+
+[33m[1m⚠[22m[39m The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[37m[1m [22m[39m Creating an optimized production build ...
+[32m[1m✓[22m[39m Compiled successfully in 4.2s
+[?25l[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m.[39m[2K[1G[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m..[39m[2K[1G[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m...[39m[2K[1G[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m.[39m[2K[1G[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m..[39m[2K[1G[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m...[39m[2K[1G[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m.[39m[2K[1G[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m..[39m[2K[1G[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m...[39m[2K[1G[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m.[39m[2K[1G[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m..[39m[2K[1G[?25h[32m[1m✓[22m[39m Completed runAfterProductionCompile in 2150ms
+[?25l [36m.[39m [2K[1G[?25h[?25l[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[?25h[?25l[37m[1m [22m[39m Finished TypeScript in 2.7s  [36m.[39m[2K[1G[?25h[37m[1m [22m[39m Finished TypeScript in 2.7s    [32m[1m✓[22m[39m Finished TypeScript in 2.7s 
+[?25l[37m[1m [22m[39m Collecting page data using 9 workers  [36m.[39m[2K[1G[37m[1m [22m[39m Collecting page data using 9 workers  [36m..[39m[2K[1G[37m[1m [22m[39m Collecting page data using 9 workers  [36m...[39m[2K[1G[?25h[37m[1m [22m[39m Collecting page data using 9 workers in 416.8ms    [32m[1m✓[22m[39m Collecting page data using 9 workers in 416.8ms 
+[?25l[37m[1m [22m[39m Generating static pages using 9 workers (0/46)  [36m[    ][39m[2K[1G[37m[1m [22m[39m Generating static pages using 9 workers (25/46)  [36m[=   ][39m[2K[1G[?25h[32m[1m✓[22m[39m Generating static pages using 9 workers (46/46) in 252.8ms
+[?25l[37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G[?25h[37m[1m [22m[39m Finalizing page optimization in 8.2ms    [32m[1m✓[22m[39m Finalizing page optimization in 8.2ms 
+
+[4mRoute (app)[24m
+┌ ○ /
+├ ○ /_not-found
+├ ○ /activities
+├ ○ /activities/new
+├ ○ /admin
+├ ○ /admin/analytics
+├ ○ /admin/feedback
+├ ○ /admin/modules
+├ ○ /admin/organizations
+├ ○ /admin/system
+├ ○ /admin/theme
+├ ○ /admin/users
+├ ○ /admin/versions
+├ ○ /ai-assistant
+├ ○ /analytics-test
+├ ƒ /api/ai
+├ ƒ /api/ai/analyze
+├ ƒ /api/auth/signout
+├ ƒ /api/sentry-example-api
+├ ƒ /auth/callback
+├ ○ /budget
+├ ○ /budget/new
+├ ○ /contracts
+├ ○ /contracts/new
+├ ƒ /invite/[token]
+├ ○ /lms
+├ ○ /login
+├ ○ /organizations
+├ ○ /participants
+├ ƒ /participants/[id]
+├ ○ /participants/new
+├ ○ /partners
+├ ○ /partners/new
+├ ○ /profile
+├ ○ /projects
+├ ƒ /projects/[id]
+├ ○ /projects/new
+├ ○ /reports
+├ ƒ /reports/[id]
+├ ○ /reports/auto
+├ ○ /reports/new
+├ ○ /sentry-example-page
+├ ○ /settings
+├ ○ /settings/feedback
+├ ○ /signout
+├ ○ /unauthorized
+├ ○ /users
+├ ○ /webgate
+└ ○ /workflows
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[?25h⠙[1G[0K

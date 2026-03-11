@@ -1,0 +1,59 @@
+{
+    "nav": {
+        "dashboard": "Panel",
+        "projects": "Proyectos",
+        "partners": "Socios",
+        "activities": "Actividades",
+        "budget": "Presupuesto",
+        "reports": "Informes",
+        "participants": "Participantes",
+        "contracts": "Contratos",
+        "workflows": "Flujos de trabajo",
+        "lms": "LMS",
+        "webgate": "Webgate",
+        "aiAssistant": "Asistente IA",
+        "settings": "Configuración",
+        "feedback": "Comentarios"
+    },
+    "dashboard": {
+        "title": "Panel",
+        "activeProjects": "Proyectos activos",
+        "totalBudget": "Presupuesto total",
+        "partners": "Socios",
+        "completedActivities": "Actividades completadas",
+        "recentProjects": "Proyectos recientes",
+        "upcomingActivities": "Próximas actividades",
+        "recentParticipants": "Participantes recientes",
+        "budgetBreakdown": "Desglose del presupuesto",
+        "viewAll": "Ver todo",
+        "details": "Detalles",
+        "loading": "Cargando..."
+    },
+    "common": {
+        "new": "Nuevo",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "search": "Buscar",
+        "filter": "Filtrar",
+        "export": "Exportar",
+        "status": "Estado",
+        "date": "Fecha",
+        "name": "Nombre",
+        "actions": "Acciones",
+        "loading": "Cargando..."
+    },
+    "feedback": {
+        "title": "Comentarios",
+        "type": {
+            "bug": "Error",
+            "suggestion": "Sugerencia",
+            "improvement": "Mejora",
+            "general": "General"
+        },
+        "message": "Mensaje",
+        "submit": "Enviar",
+        "thanks": "¡Gracias! 🎉"
+    }
+}

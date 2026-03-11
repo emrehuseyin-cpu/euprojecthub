@@ -1,0 +1,59 @@
+{
+    "nav": {
+        "dashboard": "Dashboard",
+        "projects": "Projects",
+        "partners": "Partners",
+        "activities": "Activities",
+        "budget": "Budget",
+        "reports": "Reports",
+        "participants": "Participants",
+        "contracts": "Contracts",
+        "workflows": "Workflows",
+        "lms": "LMS",
+        "webgate": "Webgate",
+        "aiAssistant": "AI Assistant",
+        "settings": "Settings",
+        "feedback": "Feedback"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "activeProjects": "Active Projects",
+        "totalBudget": "Total Budget",
+        "partners": "Partners",
+        "completedActivities": "Completed Activities",
+        "recentProjects": "Recent Projects",
+        "upcomingActivities": "Upcoming Activities",
+        "recentParticipants": "Recent Participants",
+        "budgetBreakdown": "Budget Breakdown",
+        "viewAll": "View All",
+        "details": "Details",
+        "loading": "Loading..."
+    },
+    "common": {
+        "new": "New",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "search": "Search",
+        "filter": "Filter",
+        "export": "Export",
+        "status": "Status",
+        "date": "Date",
+        "name": "Name",
+        "actions": "Actions",
+        "loading": "Loading..."
+    },
+    "feedback": {
+        "title": "Feedback",
+        "type": {
+            "bug": "Bug",
+            "suggestion": "Suggestion",
+            "improvement": "Improvement",
+            "general": "General"
+        },
+        "message": "Message",
+        "submit": "Submit",
+        "thanks": "Thank you! 🎉"
+    }
+}

@@ -1,0 +1,59 @@
+{
+    "nav": {
+        "dashboard": "Panel",
+        "projects": "Projeler",
+        "partners": "Ortaklar",
+        "activities": "Faaliyetler",
+        "budget": "Bütçe",
+        "reports": "Raporlar",
+        "participants": "Katılımcılar",
+        "contracts": "Sözleşmeler",
+        "workflows": "İş Akışları",
+        "lms": "LMS",
+        "webgate": "Webgate",
+        "aiAssistant": "AI Asistan",
+        "settings": "Ayarlar",
+        "feedback": "Geri Bildirim"
+    },
+    "dashboard": {
+        "title": "Panel",
+        "activeProjects": "Aktif Projeler",
+        "totalBudget": "Toplam Bütçe",
+        "partners": "Ortaklar",
+        "completedActivities": "Tamamlanan Faaliyetler",
+        "recentProjects": "Son Projeler",
+        "upcomingActivities": "Yaklaşan Faaliyetler",
+        "recentParticipants": "Son Katılımcılar",
+        "budgetBreakdown": "Bütçe Dağılımı",
+        "viewAll": "Tümünü Gör",
+        "details": "Detay",
+        "loading": "Yükleniyor..."
+    },
+    "common": {
+        "new": "Yeni",
+        "save": "Kaydet",
+        "cancel": "İptal",
+        "delete": "Sil",
+        "edit": "Düzenle",
+        "search": "Ara",
+        "filter": "Filtrele",
+        "export": "Dışa Aktar",
+        "status": "Durum",
+        "date": "Tarih",
+        "name": "Ad",
+        "actions": "İşlemler",
+        "loading": "Yükleniyor..."
+    },
+    "feedback": {
+        "title": "Geri Bildirim",
+        "type": {
+            "bug": "Hata",
+            "suggestion": "Öneri",
+            "improvement": "İyileştirme",
+            "general": "Genel"
+        },
+        "message": "Mesaj",
+        "submit": "Gönder",
+        "thanks": "Teşekkürler! 🎉"
+    }
+}

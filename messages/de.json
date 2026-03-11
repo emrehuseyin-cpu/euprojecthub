@@ -1,0 +1,59 @@
+{
+    "nav": {
+        "dashboard": "Dashboard",
+        "projects": "Projekte",
+        "partners": "Partner",
+        "activities": "Aktivitäten",
+        "budget": "Budget",
+        "reports": "Berichte",
+        "participants": "Teilnehmer",
+        "contracts": "Verträge",
+        "workflows": "Workflows",
+        "lms": "LMS",
+        "webgate": "Webgate",
+        "aiAssistant": "KI-Assistent",
+        "settings": "Einstellungen",
+        "feedback": "Feedback"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "activeProjects": "Aktive Projekte",
+        "totalBudget": "Gesamtbudget",
+        "partners": "Partner",
+        "completedActivities": "Abgeschlossene Aktivitäten",
+        "recentProjects": "Neueste Projekte",
+        "upcomingActivities": "Bevorstehende Aktivitäten",
+        "recentParticipants": "Neueste Teilnehmer",
+        "budgetBreakdown": "Budgetaufschlüsselung",
+        "viewAll": "Alle anzeigen",
+        "details": "Details",
+        "loading": "Wird geladen..."
+    },
+    "common": {
+        "new": "Neu",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "search": "Suchen",
+        "filter": "Filter",
+        "export": "Exportieren",
+        "status": "Status",
+        "date": "Datum",
+        "name": "Name",
+        "actions": "Aktionen",
+        "loading": "Wird geladen..."
+    },
+    "feedback": {
+        "title": "Feedback",
+        "type": {
+            "bug": "Fehler",
+            "suggestion": "Vorschlag",
+            "improvement": "Verbesserung",
+            "general": "Allgemein"
+        },
+        "message": "Nachricht",
+        "submit": "Absenden",
+        "thanks": "Vielen Dank! 🎉"
+    }
+}
