@@ -12,13 +12,19 @@ import { Header } from '../../components/Header';
 import { supabase } from '../../lib/supabase';
 import { getCourses } from '../../lib/moodle';
 import { trackEvent } from '../../lib/analytics';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { format, differenceInDays } from 'date-fns';
-import ReactMarkdown from 'react-markdown';
+import dynamic from 'next/dynamic';
 import { ActivityInlineForm } from '../../components/forms/ActivityInlineForm';
 import { ParticipantInlineForm } from '../../components/forms/ParticipantInlineForm';
 import { BudgetInlineForm } from '../../components/forms/BudgetInlineForm';
 import { SlideOver } from '../../components/SlideOver';
+
+// Dynamic imports for heavy components
+const ReactMarkdown = dynamic(() => import('react-markdown'), { ssr: false });
+const ProjectCharts = dynamic(() => import('../../components/ProjectCharts').then(mod => mod.ProjectCharts), {
+    ssr: false,
+    loading: () => <div className="h-[300px] w-full bg-gray-50 animate-pulse rounded-2xl" />
+});
 
 const COLORS = ['#4F6EF7', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
@@ -98,7 +104,12 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
     useEffect(() => {
         trackEvent('project_viewed', { project_id: id });
-        fetchProject();
+
+        // Initial load in parallel
+        Promise.all([
+            fetchProject(),
+            loadTabData('overview')
+        ]);
     }, [id]);
 
     const fetchProject = async () => {
@@ -115,34 +126,53 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         if (tabLoading[tab]) return;
         setTabLoading(prev => ({ ...prev, [tab]: true }));
         try {
+            const fetchActions = [];
+
             if (tab === 'activities' || tab === 'overview') {
-                const { data } = await supabase.from('activities').select('*').eq('project_id', id).order('start_date', { ascending: true });
-                if (data) setActivities(data);
+                fetchActions.push(
+                    supabase.from('activities').select('*').eq('project_id', id).order('start_date', { ascending: true })
+                        .then(({ data }) => data && setActivities(data))
+                );
             }
             if (tab === 'participants' || tab === 'overview') {
-                const { data } = await supabase.from('participants').select('*, activity:activities(title)').eq('project_id', id).order('created_at', { ascending: false });
-                if (data) setParticipants(data);
+                fetchActions.push(
+                    supabase.from('participants').select('*, activity:activities(title)').eq('project_id', id).order('created_at', { ascending: false })
+                        .then(({ data }) => data && setParticipants(data))
+                );
             }
             if (tab === 'budget' || tab === 'overview') {
-                const { data } = await supabase.from('budget_items').select('*').eq('project_id', id);
-                if (data) setBudgetItems(data);
+                fetchActions.push(
+                    supabase.from('budget_items').select('*').eq('project_id', id)
+                        .then(({ data }) => data && setBudgetItems(data))
+                );
             }
             if (tab === 'partners') {
-                const { data } = await supabase.from('partners').select('*').eq('project_id', id);
-                if (data) setPartners(data);
+                fetchActions.push(
+                    supabase.from('partners').select('*').eq('project_id', id)
+                        .then(({ data }) => data && setPartners(data))
+                );
             }
             if (tab === 'contracts') {
-                const { data } = await supabase.from('contracts').select('*').eq('project_id', id).order('created_at', { ascending: false });
-                if (data) setContracts(data);
+                fetchActions.push(
+                    supabase.from('contracts').select('*').eq('project_id', id).order('created_at', { ascending: false })
+                        .then(({ data }) => data && setContracts(data))
+                );
             }
             if (tab === 'reports') {
-                const { data } = await supabase.from('reports').select('*').eq('project_id', id).order('created_at', { ascending: false });
-                if (data) setReports(data);
+                fetchActions.push(
+                    supabase.from('reports').select('*').eq('project_id', id).order('created_at', { ascending: false })
+                        .then(({ data }) => data && setReports(data))
+                );
             }
             if (tab === 'lms' && courses.length === 0) {
-                const data = await getCourses();
-                if (data && Array.isArray(data)) setCourses(data.slice(0, 6));
+                fetchActions.push(
+                    getCourses().then((data) => data && Array.isArray(data) && setCourses(data.slice(0, 6)))
+                );
             }
+
+            await Promise.all(fetchActions);
+        } catch (error) {
+            console.error('[loadTabData] Error:', error);
         } finally {
             setTabLoading(prev => ({ ...prev, [tab]: false }));
         }
@@ -409,20 +439,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                                             {activities.length === 0 && <p className="text-sm text-gray-400 text-center py-6 border-2 border-dashed border-gray-100 rounded-xl">No activities yet</p>}
                                         </div>
                                     </div>
-                                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                                        <h3 className="font-bold text-gray-900 border-l-4 border-indigo-400 pl-3 mb-4">Budget Breakdown</h3>
-                                        {budgetChartData.length > 0 ? (
-                                            <ResponsiveContainer width="100%" height={200}>
-                                                <PieChart>
-                                                    <Pie data={budgetChartData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
-                                                        {budgetChartData.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                                                    </Pie>
-                                                    <Tooltip formatter={(v: any) => `€${Number(v).toLocaleString()}`} />
-                                                    <Legend iconSize={10} wrapperStyle={{ fontSize: '11px' }} />
-                                                </PieChart>
-                                            </ResponsiveContainer>
-                                        ) : <p className="text-sm text-gray-400 text-center py-12">No budget data</p>}
-                                    </div>
+                                    <ProjectCharts budgetData={budgetChartData} COLORS={COLORS} />
                                 </div>
 
                                 {project.description && (
@@ -575,17 +592,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                                 {budgetChartData.length > 0 && (
                                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                                         <h3 className="font-bold text-gray-900 border-l-4 border-indigo-400 pl-3 mb-4">Spending by Category</h3>
-                                        <ResponsiveContainer width="100%" height={200}>
-                                            <BarChart data={budgetChartData}>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                                                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                                                <YAxis tick={{ fontSize: 11 }} />
-                                                <Tooltip formatter={(v: any) => `€${Number(v).toLocaleString()}`} />
-                                                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                                                    {budgetChartData.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                                                </Bar>
-                                            </BarChart>
-                                        </ResponsiveContainer>
+                                        <ProjectCharts budgetData={budgetChartData} COLORS={COLORS} />
                                     </div>
                                 )}
                                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
