@@ -28,3 +28,5 @@ function isAtLeast(current, target) {
     return roles.indexOf(current || 'member') >= roles.indexOf(target);
 }
 __exportStar(require("./types"), exports);
+__exportStar(require("./erasmus/rules"), exports);
+__exportStar(require("./erasmus/validator"), exports);

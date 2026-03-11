@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
     ArrowLeft, Settings, Calendar, Wallet, Activity, Users, FileText,
     GraduationCap, BookOpen, ExternalLink, Loader2, Plus, Download,
-    MapPin, BarChart3, CheckCircle2, Clock, AlertCircle, X, FileSignature, Link as LinkIcon
+    MapPin, BarChart3, CheckCircle2, Clock, AlertCircle, X, FileSignature, Link as LinkIcon, Sparkles
 } from 'lucide-react';
 import { Sidebar } from '../../components/Sidebar';
 import { Header } from '../../components/Header';
@@ -89,7 +89,9 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
     // AI Analysis
     const [aiReport, setAiReport] = useState<string | null>(null);
+    const [erasmusReport, setErasmusReport] = useState<string | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
+    const [erasmusLoading, setErasmusLoading] = useState(false);
 
     // Activity status filter
     const [activityFilter, setActivityFilter] = useState('All');
@@ -195,7 +197,29 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         return acc;
     }, {});
 
-    const runAiAnalysis = async () => {
+    const runErasmusAI = async () => {
+        if (!project) return;
+        setErasmusLoading(true);
+        setErasmusReport(null);
+        try {
+            const response = await fetch('/api/erasmus/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ projectData: project }),
+            });
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+            setErasmusReport(data.analysis);
+            trackEvent('erasmus_ai_analysis_run', { project_id: id });
+        } catch (error) {
+            console.error('Erasmus AI Error:', error);
+            alert('Erasmus+ analizi yapılamadı.');
+        } finally {
+            setErasmusLoading(false);
+        }
+    };
+
+    const runAI = async () => {
         setAiLoading(true);
         try {
             const response = await fetch('/api/ai/analyze', {
@@ -283,11 +307,34 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
                                 {/* Action Buttons */}
                                 <div className="flex items-center gap-2 flex-shrink-0">
-                                    <button onClick={runAiAnalysis} disabled={aiLoading}
-                                        className="flex items-center gap-2 px-3 py-2 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-sm font-bold transition-all disabled:opacity-50">
-                                        {aiLoading ? <Loader2 size={15} className="animate-spin" /> : <Activity size={15} />}
-                                        {aiLoading ? 'Analiz Ediliyor...' : 'AI Analiz Et'}
-                                    </button>
+                                    {/* AI Actions */}
+                                    <div className="flex flex-col gap-2 p-2 bg-blue-50 border border-blue-100 rounded-xl">
+                                        <button
+                                            onClick={() => {
+                                                setModal('ai-analysis');
+                                                runAI();
+                                            }}
+                                            disabled={aiLoading}
+                                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-sm disabled:opacity-50"
+                                        >
+                                            {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles size={16} />}
+                                            Genel Sağlık Analizi
+                                        </button>
+
+                                        {project?.program?.includes('Erasmus') && (
+                                            <button
+                                                onClick={() => {
+                                                    setModal('erasmus-ai');
+                                                    runErasmusAI();
+                                                }}
+                                                disabled={erasmusLoading}
+                                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all shadow-sm disabled:opacity-50"
+                                            >
+                                                {erasmusLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles size={16} />}
+                                                Erasmus+ 2026 Analizi
+                                            </button>
+                                        )}
+                                    </div>
                                     <Link href={`/reports/new?project_id=${id}`}
                                         className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 text-sm font-semibold transition-all">
                                         <FileText size={15} /> Generate Report
@@ -750,6 +797,27 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                     </div>
                 </main>
             </div>
+
+            <Modal
+                open={modal === 'erasmus-ai'}
+                onClose={() => setModal(null)}
+                title="🇪🇺 Erasmus+ 2026 Uzman Analizi"
+            >
+                {erasmusLoading ? (
+                    <div className="flex flex-col items-center justify-center py-12 gap-4">
+                        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+                        <p className="text-gray-500 animate-pulse font-medium">Program kılavuzu taranıyor ve analiz yapılıyor...</p>
+                    </div>
+                ) : erasmusReport ? (
+                    <div className="prose prose-blue max-w-none prose-sm">
+                        <ReactMarkdown>{erasmusReport}</ReactMarkdown>
+                    </div>
+                ) : (
+                    <div className="text-center py-8">
+                        <p className="text-gray-500">Analiz başlatılamadı.</p>
+                    </div>
+                )}
+            </Modal>
 
             {/* ─── SLIDE-OVERS (PREMIUM UI) ─── */}
             <SlideOver

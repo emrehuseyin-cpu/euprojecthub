@@ -16,6 +16,7 @@ import { Header } from '../../components/Header';
 import { Sidebar } from '../../components/Sidebar';
 import { supabase } from '../../lib/supabase';
 import { trackEvent, trackError } from '../../lib/analytics';
+import { ERASMUS_PROGRAMS, validateProject } from '@euprojecthub/core';
 
 const projectSchema = z.object({
     name: z.string().min(3, 'Proje adı en az 3 karakter olmalıdır'),
@@ -25,6 +26,7 @@ const projectSchema = z.object({
     endDate: z.string().min(1, 'Bitiş tarihi zorunludur'),
     budget: z.string().min(1, 'Bütçe belirtmelisiniz'),
     description: z.string().min(10, 'Açıklama en az 10 karakter olmalıdır'),
+    partnerCount: z.number().min(1, 'En az 1 ortak belirtilmelidir'),
 });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
@@ -32,18 +34,57 @@ type ProjectFormValues = z.infer<typeof projectSchema>;
 export default function NewProjectPage() {
     const router = useRouter();
     const [submitError, setSubmitError] = useState<string | null>(null);
+    const [validationResult, setValidationResult] = useState<{ valid: boolean, errors: string[], warnings: string[] } | null>(null);
 
     const {
         register,
         handleSubmit,
+        watch,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<ProjectFormValues>({
         resolver: zodResolver(projectSchema),
+        defaultValues: {
+            name: '',
+            program: '',
+            type: '',
+            startDate: '',
+            endDate: '',
+            budget: '',
+            description: '',
+            partnerCount: 1,
+        }
     });
+
+    const selectedProgram = watch('program');
+
+    // Erasmus specific rules extraction
+    const erasmusKey = (selectedProgram && selectedProgram.startsWith('Erasmus+ '))
+        ? selectedProgram.replace('Erasmus+ ', '') as keyof typeof ERASMUS_PROGRAMS
+        : null;
+    const erasmusRules = erasmusKey ? ERASMUS_PROGRAMS[erasmusKey] : null;
 
     const onSubmit = async (data: ProjectFormValues) => {
         try {
             setSubmitError(null);
+
+            // Erasmus Validation
+            if (erasmusKey) {
+                const validation = validateProject({
+                    program_type: erasmusKey,
+                    partner_count: data.partnerCount,
+                    start_date: data.startDate,
+                    end_date: data.endDate,
+                    budget: data.budget
+                });
+
+                if (!validation.valid) {
+                    setSubmitError(`Program Kuralları Hatası: ${validation.errors.join(', ')}`);
+                    setValidationResult(validation);
+                    return;
+                }
+                setValidationResult(validation);
+            }
 
             const { error } = await supabase
                 .from('projects')
@@ -56,6 +97,7 @@ export default function NewProjectPage() {
                         start_date: data.startDate,
                         end_date: data.endDate,
                         description: data.description,
+                        partner_count: data.partnerCount,
                     }
                 ]);
 
@@ -201,25 +243,93 @@ export default function NewProjectPage() {
                                         </div>
                                     </div>
 
-                                    {/* Bütçe */}
-                                    <div>
-                                        <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Toplam Bütçe <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <span className="text-gray-500 sm:text-sm">€</span>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {/* Bütçe */}
+                                        <div>
+                                            <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1">
+                                                Toplam Bütçe <span className="text-red-500">*</span>
+                                            </label>
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <span className="text-gray-500 sm:text-sm">€</span>
+                                                </div>
+                                                {erasmusRules && 'budgetOptions' in erasmusRules ? (
+                                                    <select
+                                                        id="budget"
+                                                        className={`w-full pl-8 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors bg-white ${errors.budget ? 'border-red-300' : 'border-gray-300'}`}
+                                                        {...register('budget')}
+                                                    >
+                                                        <option value="">Lump Sum Seçiniz</option>
+                                                        {(erasmusRules.budgetOptions as any).map((opt: number) => (
+                                                            <option key={opt} value={opt}>€{opt.toLocaleString()}</option>
+                                                        ))}
+                                                    </select>
+                                                ) : (
+                                                    <input
+                                                        id="budget"
+                                                        type="text"
+                                                        className={`w-full pl-8 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${errors.budget ? 'border-red-300 focus:border-red-500' : 'border-gray-300'}`}
+                                                        placeholder="250,000"
+                                                        {...register('budget')}
+                                                    />
+                                                )}
                                             </div>
-                                            <input
-                                                id="budget"
-                                                type="text"
-                                                className={`w-full pl-8 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${errors.budget ? 'border-red-300 focus:border-red-500' : 'border-gray-300'}`}
-                                                placeholder="250,000"
-                                                {...register('budget')}
-                                            />
+                                            {errors.budget && <p className="mt-1 text-sm text-red-600">{errors.budget.message}</p>}
+                                            {erasmusRules && (
+                                                <p className="mt-1.5 text-xs text-blue-600 bg-blue-50 p-2 rounded-md">
+                                                    ℹ️ <strong>{erasmusKey}</strong> kuralları gereği ön tanımlı lump sum bütçelerden biri seçilmelidir.
+                                                </p>
+                                            )}
                                         </div>
-                                        {errors.budget && <p className="mt-1 text-sm text-red-600">{errors.budget.message}</p>}
+
+                                        {/* Ortak Sayısı */}
+                                        <div>
+                                            <label htmlFor="partnerCount" className="block text-sm font-medium text-gray-700 mb-1">
+                                                Ortak Sayısı <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                id="partnerCount"
+                                                type="number"
+                                                min="1"
+                                                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${errors.partnerCount ? 'border-red-300' : 'border-gray-300'}`}
+                                                {...register('partnerCount', { valueAsNumber: true })}
+                                            />
+                                            {errors.partnerCount && <p className="mt-1 text-sm text-red-600">{errors.partnerCount.message}</p>}
+                                            {erasmusRules && (
+                                                <p className={`mt-1.5 text-xs p-2 rounded-md ${(erasmusRules as any).minPartners > (watch('partnerCount') || 0) ? 'text-red-600 bg-red-50 font-bold' : 'text-green-600 bg-green-50'}`}>
+                                                    {(erasmusRules as any).minPartners > (watch('partnerCount') || 0)
+                                                        ? `⚠️ En az ${(erasmusRules as any).minPartners} ortak gereklidir.`
+                                                        : `✅ Minimum ortak şartı karşılanıyor.`}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
+
+                                    {/* Program Uyarıları / Bilgileri */}
+                                    {erasmusRules && (
+                                        <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-2">
+                                            <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                                🇪🇺 Erasmus+ 2026 Kılavuz Bilgisi
+                                            </h4>
+                                            <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
+                                                <li><strong>Süre:</strong> {(erasmusRules as any).minDurationMonths}-{(erasmusRules as any).maxDurationMonths} ay arası.</li>
+                                                <li><strong>Başvuru:</strong> {(erasmusRules as any).mainDeadline} (Ana Dönem)</li>
+                                                {(erasmusRules as any).excludedCountries?.map((c: string) => (
+                                                    <li key={c} className="text-red-500 underline font-medium">⚠️ {c} kuruluşları hibe kapsamı dışındadır.</li>
+                                                ))}
+                                                <li><strong>Kaynak:</strong> Erasmus+ Programme Guide 2026</li>
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {validationResult && !validationResult.valid && (
+                                        <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                                            <p className="text-sm font-bold text-red-700">Kritik Hatalar:</p>
+                                            <ul className="text-xs text-red-600 mt-1 list-disc ml-4">
+                                                {validationResult.errors.map((e, i) => <li key={i}>{e}</li>)}
+                                            </ul>
+                                        </div>
+                                    )}
 
                                     {/* Açıklama */}
                                     <div>

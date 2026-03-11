@@ -4,3 +4,5 @@ export declare const supabase: import("@supabase/supabase-js").SupabaseClient<an
 export type Role = 'member' | 'org_admin' | 'super_admin';
 export declare function isAtLeast(current: Role | undefined, target: Role): boolean;
 export * from './types';
+export * from './erasmus/rules';
+export * from './erasmus/validator';
