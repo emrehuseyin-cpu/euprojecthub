@@ -5,7 +5,8 @@ import Link from 'next/link';
 import {
     ArrowLeft, Settings, Calendar, Wallet, Activity, Users, FileText,
     GraduationCap, BookOpen, ExternalLink, Loader2, Plus, Download,
-    MapPin, BarChart3, CheckCircle2, Clock, AlertCircle, X, FileSignature, Link as LinkIcon, Sparkles
+    MapPin, BarChart3, CheckCircle2, Clock, AlertCircle, X, FileSignature, Link as LinkIcon, Sparkles,
+    Bot, Info, HelpCircle
 } from 'lucide-react';
 import { Sidebar } from '../../components/Sidebar';
 import { Header } from '../../components/Header';
@@ -18,6 +19,8 @@ import { ActivityInlineForm } from '../../components/forms/ActivityInlineForm';
 import { ParticipantInlineForm } from '../../components/forms/ParticipantInlineForm';
 import { BudgetInlineForm } from '../../components/forms/BudgetInlineForm';
 import { SlideOver } from '../../components/SlideOver';
+import { Skeleton, SkeletonCard, SkeletonRow } from '../../components/Skeleton';
+import { AIAnalysisResults } from '../../components/AIAnalysisResults';
 
 // Dynamic imports for heavy components
 const ReactMarkdown = dynamic(() => import('react-markdown'), { ssr: false });
@@ -186,13 +189,42 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         loadTabData(activeTab);
     }, [activeTab]);
 
+
     if (loading) return (
-        <div className="flex h-screen" style={{ background: '#F8F9FC' }}>
+        <div className="flex h-screen bg-gray-50">
             <Sidebar />
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col overflow-hidden">
                 <Header />
-                <div className="flex-1 flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+                <div className="flex-1 overflow-y-auto p-8">
+                    <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-3">
+                                <Skeleton className="h-4 w-32" />
+                                <Skeleton className="h-10 w-64" />
+                            </div>
+                            <div className="flex gap-3">
+                                <Skeleton className="h-10 w-24 rounded-xl" />
+                                <Skeleton className="h-10 w-32 rounded-xl" />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            {[1, 2, 3, 4].map(i => <SkeletonCard key={i} />)}
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2 space-y-4">
+                                <Skeleton className="h-6 w-48 mb-4" />
+                                {[1, 2, 3].map(i => <SkeletonRow key={i} />)}
+                            </div>
+                            <div className="space-y-4">
+                                <Skeleton className="h-6 w-48 mb-4" />
+                                <div className="aspect-square bg-white rounded-2xl border border-gray-100 flex items-center justify-center">
+                                    <Skeleton className="w-3/4 h-3/4 rounded-full" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -811,17 +843,24 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 title="🇪🇺 Erasmus+ 2026 Uzman Analizi"
             >
                 {erasmusLoading ? (
-                    <div className="flex flex-col items-center justify-center py-12 gap-4">
-                        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
-                        <p className="text-gray-500 animate-pulse font-medium">Program kılavuzu taranıyor ve analiz yapılıyor...</p>
+                    <div className="flex flex-col items-center justify-center py-20 gap-6">
+                        <div className="relative">
+                            <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
+                            <Bot className="absolute inset-0 m-auto text-indigo-600" size={24} />
+                        </div>
+                        <div className="text-center space-y-2">
+                            <p className="text-lg font-bold text-gray-900 animate-pulse">Analiz Hazırlanıyor...</p>
+                            <p className="text-sm text-gray-400">Erasmus+ 2026 rehberine göre kriterler kontrol ediliyor.</p>
+                        </div>
                     </div>
                 ) : erasmusReport ? (
-                    <div className="prose prose-blue max-w-none prose-sm">
-                        <ReactMarkdown>{erasmusReport}</ReactMarkdown>
-                    </div>
+                    <AIAnalysisResults analysis={erasmusReport} validation={{ valid: true, errors: [], warnings: [] }} />
                 ) : (
-                    <div className="text-center py-8">
-                        <p className="text-gray-500">Analiz başlatılamadı.</p>
+                    <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <Bot size={32} className="text-gray-300" />
+                        </div>
+                        <p className="text-gray-500 font-medium">Analiz başlatılamadı veya veri bulunamadı.</p>
                     </div>
                 )}
             </Modal>

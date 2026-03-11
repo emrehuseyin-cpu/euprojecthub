@@ -10,7 +10,9 @@ import {
     ArrowLeft,
     FolderKanban,
     Save,
-    Loader2
+    Loader2,
+    Info,
+    HelpCircle
 } from 'lucide-react';
 import { Header } from '../../components/Header';
 import { Sidebar } from '../../components/Sidebar';
@@ -245,9 +247,13 @@ export default function NewProjectPage() {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {/* Bütçe */}
-                                        <div>
-                                            <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1">
+                                        <div className="group relative">
+                                            <label htmlFor="budget" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                                                 Toplam Bütçe <span className="text-red-500">*</span>
+                                                <HelpCircle size={14} className="text-gray-400 cursor-help hover:text-indigo-500 transition-colors" />
+                                                <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-[10px] rounded-xl shadow-2xl z-50 leading-relaxed ring-1 ring-white/20">
+                                                    Erasmus+ 2026 kurallarına göre KA220 projeleri için 120k, 250k veya 400k Euro; KA210 projeleri için 30k veya 60k Euro lump sum bütçe seçilmelidir.
+                                                </div>
                                             </label>
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -283,9 +289,13 @@ export default function NewProjectPage() {
                                         </div>
 
                                         {/* Ortak Sayısı */}
-                                        <div>
-                                            <label htmlFor="partnerCount" className="block text-sm font-medium text-gray-700 mb-1">
+                                        <div className="group relative">
+                                            <label htmlFor="partnerCount" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                                                 Ortak Sayısı <span className="text-red-500">*</span>
+                                                <Info size={14} className="text-gray-400 cursor-help hover:text-indigo-500 transition-colors" />
+                                                <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-[10px] rounded-xl shadow-2xl z-50 leading-relaxed ring-1 ring-white/20">
+                                                    KA220 projeleri için en az 3 farklı program ülkesinden ortak gereklidir. KA210 projeleri için 2 ortak yeterlidir.
+                                                </div>
                                             </label>
                                             <input
                                                 id="partnerCount"
