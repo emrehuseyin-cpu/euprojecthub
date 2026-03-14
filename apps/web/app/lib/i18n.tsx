@@ -22,6 +22,8 @@ const translations = {
         nav_settings: 'Settings',
         nav_users: 'Team Members',
         nav_organizations: 'Organizations',
+        nav_proposals: 'Proposals',
+        nav_org_registry: 'Organisation Registry',
 
         // Nav groups
         group_general: 'General',
@@ -185,6 +187,8 @@ const translations = {
         nav_settings: 'Ayarlar',
         nav_users: 'Ekip Üyeleri',
         nav_organizations: 'Organizasyonlar',
+        nav_proposals: 'Teklifler',
+        nav_org_registry: 'Organizasyon Kaydı',
 
         group_general: 'Genel',
         group_project_mgmt: 'Proje Yönetimi',
@@ -339,6 +343,8 @@ const translations = {
         nav_settings: 'Einstellungen',
         nav_users: 'Teammitglieder',
         nav_organizations: 'Organisationen',
+        nav_proposals: 'Vorschläge',
+        nav_org_registry: 'Organisationsregister',
 
         group_general: 'Allgemein',
         group_project_mgmt: 'Projektmanagement',

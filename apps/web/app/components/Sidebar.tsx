@@ -7,7 +7,8 @@ import {
     LayoutDashboard, FolderKanban, Activity, UsersRound,
     Wallet, FileSignature, Users, Link as LinkIcon,
     GraduationCap, FileText, Zap, Bot, MessageSquare, Settings,
-    ChevronLeft, ChevronRight, Building2, UserCog, ShieldCheck
+    ChevronLeft, ChevronRight, Building2, UserCog, ShieldCheck,
+    ScrollText, Building
 } from 'lucide-react';
 import { useLanguage, type TranslationKey } from '../lib/i18n';
 import { useAuth } from '../lib/AuthContext';
@@ -29,6 +30,7 @@ const navGroups: Array<{
             labelKey: 'group_project_mgmt',
             items: [
                 { href: '/projects', labelKey: 'nav_projects', icon: FolderKanban, color: 'text-emerald-400', activeBg: 'bg-emerald-500/10' },
+                { href: '/proposals', labelKey: 'nav_proposals', icon: ScrollText, color: 'text-blue-400', activeBg: 'bg-blue-500/10' },
                 { href: '/activities', labelKey: 'nav_activities', icon: Activity, color: 'text-orange-400', activeBg: 'bg-orange-500/10' },
                 { href: '/participants', labelKey: 'nav_participants', icon: UsersRound, color: 'text-pink-400', activeBg: 'bg-pink-500/10' },
             ]
@@ -44,6 +46,7 @@ const navGroups: Array<{
             labelKey: 'group_partnership',
             items: [
                 { href: '/partners', labelKey: 'nav_partners', icon: Users, color: 'text-purple-400', activeBg: 'bg-purple-500/10' },
+                { href: '/organisations', labelKey: 'nav_org_registry', icon: Building, color: 'text-amber-400', activeBg: 'bg-amber-500/10' },
                 { href: '/webgate', labelKey: 'nav_webgate', icon: LinkIcon, color: 'text-teal-400', activeBg: 'bg-teal-500/10' },
             ]
         },
