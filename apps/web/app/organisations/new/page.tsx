@@ -5,23 +5,24 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import { Sidebar } from '../../components/Sidebar';
 import { Header } from '../../components/Header';
-import { Building, ArrowLeft, Search, Loader2, CheckCircle2, AlertCircle, Save, X, Globe, MapPin, Mail, Hash, Info, Sparkles, Wand2 } from 'lucide-react';
+import { 
+    Building2, ArrowLeft, Search, Loader2, CheckCircle2, 
+    AlertCircle, Save, X, Globe, MapPin, Mail, Hash, 
+    Info, Sparkles, Wand2, Globe2, Link as LinkIcon
+} from 'lucide-react';
 import { useLanguage } from '../../lib/i18n';
 import { getOrganisationByPIC } from '@euprojecthub/core';
-import { OrgLookupModal } from '../../components/OrgLookupModal';
+import OrgSearchModal from '../../components/OrgSearchModal';
 
 export default function NewOrganisationPage() {
     const router = useRouter();
     const { t } = useLanguage();
-    // Use the standard supabase client as in other functional components
 
     const [loading, setLoading] = useState(false);
-    const [searchingOid, setSearchingOid] = useState(false);
     const [searchingPic, setSearchingPic] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
     const [picSuccess, setPicSuccess] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [isLookupModalOpen, setIsLookupModalOpen] = useState(false);
+    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
     const [showSuccessToast, setShowSuccessToast] = useState<string | null>(null);
 
     const [form, setForm] = useState({
@@ -40,10 +41,6 @@ export default function NewOrganisationPage() {
     const picRegex = /^\d{9}$/;
     const isOidValid = oidRegex.test(form.oid);
     const isPicValid = picRegex.test(form.pic);
-
-    const handleSearchEC = () => {
-        window.open('https://webgate.ec.europa.eu/erasmus-esc/index/organisations/search-for-an-organisation', '_blank');
-    };
 
     const handlePicLookup = async (pic: string) => {
         if (!/^\d{9}$/.test(pic)) return;
@@ -79,11 +76,12 @@ export default function NewOrganisationPage() {
             pic: selectedOrg.pic,
             city: selectedOrg.city,
             country: selectedOrg.country,
+            // These might be dynamically added fields
             registrationNum: selectedOrg.registrationNum || '',
             vat: selectedOrg.vat || '',
         }));
         
-        setShowSuccessToast(`Organisation selected: ${selectedOrg.name}`);
+        setShowSuccessToast(`Organisation details populated from EC Database`);
         setTimeout(() => setShowSuccessToast(null), 3000);
     };
 
@@ -104,236 +102,176 @@ export default function NewOrganisationPage() {
     };
 
     return (
-        <div className="flex h-screen font-sans overflow-hidden" style={{ background: '#F8F9FC' }}>
+        <div className="flex h-screen font-sans overflow-hidden bg-[#F1F5F9]">
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header />
-                <main className="flex-1 overflow-y-auto p-6 md:p-12">
-                    <div className="max-w-3xl mx-auto">
-                        {/* Back Link */}
-                        <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-8 font-bold text-sm transition-colors group">
-                            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                            Back to Registry
-                        </button>
-
-                        <div className="mb-10 text-center">
-                            <h2 className="text-3xl font-black text-gray-900 mb-2">Add New Organisation</h2>
-                            <p className="text-gray-500">Search by OID or enter details manually to add to your registry.</p>
+                <main className="flex-1 overflow-y-auto">
+                    <div className="max-w-4xl mx-auto p-8 md:p-12 space-y-8">
+                        
+                        {/* Header Section */}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-500 hover:text-blue-600 mb-4 font-bold text-xs transition-colors group uppercase tracking-widest">
+                                    <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+                                    Back to Registry
+                                </button>
+                                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Add New Organisation</h1>
+                                <p className="text-slate-500 mt-1 font-medium">Register a partner institution to your directory.</p>
+                            </div>
+                            
+                            <button 
+                                type="button"
+                                onClick={() => setIsSearchModalOpen(true)}
+                                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/10 active:scale-95 transition-all text-sm"
+                            >
+                                <Search size={18} />
+                                Search Database
+                            </button>
                         </div>
 
-                        {/* External Lookup Tool */}
-                        <div className="bg-orange-500/5 border border-orange-500/10 rounded-[2rem] p-8 mb-8">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div className="flex-1">
-                                    <h4 className="flex items-center gap-2 text-orange-700 font-black text-sm uppercase tracking-wider mb-2">
-                                        <Search size={16} /> Official EC Database
-                                    </h4>
-                                    <p className="text-[10px] text-orange-600 font-bold max-w-sm">
-                                        Search the official EC database, find your partner, then copy their OID and PIC back here.
-                                    </p>
-                                </div>
-                                <button 
-                                    type="button"
-                                    onClick={() => setIsLookupModalOpen(true)}
-                                    title="Search the official EC database, then copy the OID back here"
-                                    className="px-8 py-4 bg-orange-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
-                                    <Search size={18} />
-                                    Search EC Database 🧪
-                                </button>
-                            </div>
+                        {/* Search Hint Box */}
+                        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex gap-4 items-start">
+                             <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                                <Info size={20} />
+                             </div>
+                             <div>
+                                <h4 className="text-sm font-bold text-blue-900">Pro-Tip: Use the EC Search</h4>
+                                <p className="text-xs text-blue-700/80 mt-1 font-medium leading-relaxed">
+                                    Searching the official database is much faster. It automatically fills in the OID, PIC, Legal Name, and address details directly from the EU Portal.
+                                </p>
+                             </div>
                         </div>
 
                         {/* Organisation Form */}
-                        <form onSubmit={handleSubmit} className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl p-8 md:p-12 space-y-8">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="md:col-span-2">
-                                    <div className="flex items-center justify-between px-1 mb-2">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Legal Name</label>
-                                        <button 
-                                            type="button"
-                                            onClick={() => setIsLookupModalOpen(true)}
-                                            className="text-[9px] font-black text-orange-600 hover:text-orange-700 flex items-center gap-1 uppercase tracking-tighter"
+                        <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 md:p-10 space-y-10">
+                            
+                            {/* Section: Basic Identity */}
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-2 pb-2 border-b border-slate-50">
+                                    <Building2 className="text-blue-600" size={18} />
+                                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Institution Identity</h3>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Legal Organisation Name</label>
+                                        <div className="relative">
+                                            <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                            <input 
+                                                required
+                                                type="text"
+                                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-semibold text-slate-900"
+                                                placeholder="e.g. University of Example"
+                                                value={form.legal_name}
+                                                onChange={e => setForm({...form, legal_name: e.target.value})}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Organisation Type</label>
+                                        <select 
+                                            className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-semibold text-slate-900 appearance-none shadow-sm"
+                                            value={form.type}
+                                            onChange={e => setForm({...form, type: e.target.value})}
                                         >
-                                            <Search size={10} /> Search by name instead →
-                                        </button>
+                                            <option value="NGO">NGO (Non-Profit)</option>
+                                            <option value="HEI">Higher Education Institute</option>
+                                            <option value="School">School / Institute</option>
+                                            <option value="SME">SME / Private Company</option>
+                                            <option value="Public">Public Body / Authority</option>
+                                            <option value="Other">Other</option>
+                                        </select>
                                     </div>
-                                    <div className="relative">
-                                        <Building className="absolute left-4 top-4 text-gray-300" size={18} />
-                                        <input 
-                                            required
-                                            type="text"
-                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-bold text-gray-900"
-                                            placeholder="National Agency / Association Name..."
-                                            value={form.legal_name}
-                                            onChange={e => setForm({...form, legal_name: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
 
-                                <div>
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Organisation Type</label>
-                                    <select 
-                                        className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-bold text-gray-900 appearance-none shadow-sm"
-                                        value={form.type}
-                                        onChange={e => setForm({...form, type: e.target.value})}
-                                    >
-                                        <option value="NGO">NGO (Non-Profit)</option>
-                                        <option value="HEI">Higher Education Institute</option>
-                                        <option value="School">School / Institute</option>
-                                        <option value="SME">SME / Private Company</option>
-                                        <option value="Public">Public Body / Authority</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center justify-between px-1 mb-2">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">OID (Organisation ID)</label>
-                                        {form.oid && (
-                                            <a 
-                                                href="https://webgate.ec.europa.eu/erasmus-esc/index/organisations/search-for-an-organisation"
-                                                target="_blank"
-                                                className="text-[9px] font-black text-blue-600 hover:underline uppercase tracking-tighter"
-                                            >
-                                                Verify on EC website ↗
-                                            </a>
-                                        )}
-                                    </div>
-                                    <div className="relative">
-                                        <Hash className={`absolute left-4 top-4 transition-colors ${form.oid ? (isOidValid ? 'text-emerald-500' : 'text-red-500') : 'text-gray-300'}`} size={18} />
-                                        <input 
-                                            type="text"
-                                            className={`w-full pl-12 pr-12 py-4 bg-gray-50 border rounded-2xl focus:bg-white focus:ring-4 outline-none transition-all font-bold text-gray-900 ${form.oid ? (isOidValid ? 'border-emerald-100 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-red-100 focus:ring-red-500/10 focus:border-red-500') : 'border-gray-100 focus:ring-indigo-500/10 focus:border-indigo-500'}`}
-                                            placeholder="E12345678"
-                                            value={form.oid}
-                                            onChange={e => setForm({...form, oid: e.target.value.toUpperCase()})}
-                                        />
-                                        {form.oid && (
-                                            <div className="absolute right-4 top-4">
-                                                {isOidValid ? <CheckCircle2 size={18} className="text-emerald-500" /> : <AlertCircle size={18} className="text-red-500" />}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <p className="mt-2 px-1 text-[9px] text-gray-400 font-medium leading-relaxed">
-                                        Format E12345678. Find it at webgate.ec.europa.eu or ask your coordinator.
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center justify-between px-1 mb-2">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">PIC Number</label>
-                                        {(form.pic && isPicValid) && (
-                                            <div className="flex gap-2">
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">PIC Number (9 Digits)</label>
+                                        <div className="relative">
+                                            <Hash className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${form.pic ? (isPicValid ? 'text-emerald-500' : 'text-slate-300') : 'text-slate-300'}`} size={18} />
+                                            <input 
+                                                type="text"
+                                                disabled={searchingPic}
+                                                className={`w-full pl-12 pr-12 py-4 bg-slate-50 border rounded-2xl focus:bg-white focus:ring-4 outline-none transition-all font-semibold text-slate-900 ${form.pic ? (isPicValid ? 'border-emerald-200 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-slate-100 focus:ring-blue-500/10 focus:border-blue-500') : 'border-slate-100 focus:ring-blue-500/10 focus:border-blue-500'} disabled:opacity-50`}
+                                                placeholder="e.g. 949123456"
+                                                value={form.pic}
+                                                onChange={e => setForm({...form, pic: e.target.value.replace(/\D/g, '').slice(0, 9)})}
+                                            />
+                                            {isPicValid && !searchingPic && (
                                                 <button 
                                                     type="button"
                                                     onClick={() => handlePicLookup(form.pic)}
-                                                    className="text-[9px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-tighter flex items-center gap-1"
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-700 transition-colors"
+                                                    title="Auto-fill data"
                                                 >
-                                                    <Sparkles size={10} /> Auto-fill Details
+                                                    <Sparkles size={18} />
                                                 </button>
-                                                <a 
-                                                    href={`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/how-to-participate/org-details/${form.pic}`}
-                                                    target="_blank"
-                                                    className="text-[9px] font-black text-blue-600 hover:underline uppercase tracking-tighter"
-                                                >
-                                                    Verify ↗
-                                                </a>
-                                            </div>
-                                        )}
+                                            )}
+                                            {searchingPic && (
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                                    <Loader2 size={18} className="text-blue-500 animate-spin" />
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="relative">
-                                        <Hash className={`absolute left-4 top-4 transition-colors ${form.pic ? (isPicValid ? 'text-emerald-500' : 'text-red-500') : 'text-gray-300'}`} size={18} />
+                                </div>
+                            </div>
+
+                            {/* Section: Location & Contact */}
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-2 pb-2 border-b border-slate-50">
+                                    <MapPin className="text-blue-600" size={18} />
+                                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Location & Contact</h3>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Country</label>
+                                        <div className="relative">
+                                            <Globe2 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                            <input 
+                                                required
+                                                type="text"
+                                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-semibold text-slate-900"
+                                                placeholder="e.g. Turkey"
+                                                value={form.country}
+                                                onChange={e => setForm({...form, country: e.target.value})}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">City</label>
                                         <input 
                                             type="text"
-                                            disabled={searchingPic}
-                                            className={`w-full pl-12 pr-12 py-4 bg-gray-50 border rounded-2xl focus:bg-white focus:ring-4 outline-none transition-all font-bold text-gray-900 ${form.pic ? (isPicValid ? 'border-emerald-100 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-red-100 focus:ring-red-500/10 focus:border-red-500') : 'border-gray-100 focus:ring-indigo-500/10 focus:border-indigo-500'} disabled:opacity-50`}
-                                            placeholder="9 digits (e.g. 949123456)"
-                                            value={form.pic}
-                                            onChange={e => setForm({...form, pic: e.target.value.replace(/\D/g, '').slice(0, 9)})}
-                                        />
-                                        {searchingPic ? (
-                                            <div className="absolute right-4 top-4">
-                                                <Loader2 size={18} className="text-blue-500 animate-spin" />
-                                            </div>
-                                        ) : form.pic && (
-                                            <div className="absolute right-4 top-4">
-                                                {isPicValid ? <CheckCircle2 size={18} className="text-emerald-500" /> : <AlertCircle size={18} className="text-red-500" />}
-                                            </div>
-                                        )}
-                                    </div>
-                                    {picSuccess && (
-                                        <p className="mt-2 px-1 text-[9px] text-emerald-600 font-bold leading-relaxed flex items-center gap-1 italic">
-                                            <CheckCircle2 size={10} /> {picSuccess}
-                                        </p>
-                                    )}
-                                    <p className="mt-2 px-1 text-[9px] text-gray-400 font-medium leading-relaxed">
-                                        9 digits, no letters. Auto-fill from EU Portal enabled once valid.
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Country</label>
-                                    <div className="relative">
-                                        <MapPin className="absolute left-4 top-4 text-gray-300" size={18} />
-                                        <input 
-                                            required
-                                            type="text"
-                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-bold text-gray-900"
-                                            placeholder="e.g. Turkey"
-                                            value={form.country}
-                                            onChange={e => setForm({...form, country: e.target.value})}
+                                            className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-semibold text-slate-900"
+                                            placeholder="e.g. Ankara"
+                                            value={form.city}
+                                            onChange={e => setForm({...form, city: e.target.value})}
                                         />
                                     </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">City</label>
-                                    <input 
-                                        type="text"
-                                        className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-bold text-gray-900"
-                                        placeholder="e.g. Ankara"
-                                        value={form.city}
-                                        onChange={e => setForm({...form, city: e.target.value})}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Contact Email</label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-4 top-4 text-gray-300" size={18} />
-                                        <input 
-                                            type="email"
-                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-bold text-gray-900"
-                                            placeholder="contact@organisation.eu"
-                                            value={form.email}
-                                            onChange={e => setForm({...form, email: e.target.value})}
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Website URL</label>
+                                        <div className="relative">
+                                            <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                            <input 
+                                                type="url"
+                                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-semibold text-slate-900"
+                                                placeholder="https://example.org"
+                                                value={form.website}
+                                                onChange={e => setForm({...form, website: e.target.value})}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Full Legal Address</label>
+                                        <textarea 
+                                            rows={2}
+                                            className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-semibold text-slate-900"
+                                            placeholder="Street name, Number, Zip code..."
+                                            value={form.address}
+                                            onChange={e => setForm({...form, address: e.target.value})}
                                         />
                                     </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Website</label>
-                                    <div className="relative">
-                                        <Globe className="absolute left-4 top-4 text-gray-300" size={18} />
-                                        <input 
-                                            type="url"
-                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-bold text-gray-900"
-                                            placeholder="https://organisation.eu"
-                                            value={form.website}
-                                            onChange={e => setForm({...form, website: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="md:col-span-2">
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Full Address</label>
-                                    <textarea 
-                                        rows={3}
-                                        className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-bold text-gray-900"
-                                        placeholder="Street, Building No, Zip Code..."
-                                        value={form.address}
-                                        onChange={e => setForm({...form, address: e.target.value})}
-                                    />
                                 </div>
                             </div>
 
@@ -348,15 +286,15 @@ export default function NewOrganisationPage() {
                                 <button 
                                     type="button"
                                     onClick={() => router.back()}
-                                    className="flex-1 py-4 bg-gray-50 text-gray-500 rounded-2xl font-black text-sm hover:bg-gray-100 transition-all flex items-center justify-center gap-2">
-                                    <X size={18} /> Cancel
+                                    className="flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-bold text-sm hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
+                                    Cancel
                                 </button>
                                 <button 
                                     type="submit"
                                     disabled={loading || !form.legal_name}
-                                    className="flex-[2] py-4 bg-gray-900 text-white rounded-2xl font-black text-sm shadow-xl shadow-gray-900/10 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                                    className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/10 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
                                     {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                                    Save Organisation
+                                    Register Organisation
                                 </button>
                             </div>
                         </form>
@@ -364,19 +302,19 @@ export default function NewOrganisationPage() {
                 </main>
             </div>
 
-            <OrgLookupModal 
-                isOpen={isLookupModalOpen}
-                onClose={() => setIsLookupModalOpen(false)}
+            <OrgSearchModal 
+                open={isSearchModalOpen}
+                onClose={() => setIsSearchModalOpen(false)}
                 onSelect={handleOrgSelect}
             />
 
             {showSuccessToast && (
                 <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-bottom-8 duration-500">
-                    <div className="bg-gray-900/95 backdrop-blur-md text-white px-8 py-4 rounded-[1.5rem] shadow-2xl flex items-center gap-3 border border-white/10">
-                        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                    <div className="bg-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10">
+                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
                             <CheckCircle2 size={18} />
                         </div>
-                        <p className="text-sm font-black tracking-tight">{showSuccessToast}</p>
+                        <p className="text-sm font-bold tracking-tight">{showSuccessToast}</p>
                     </div>
                 </div>
             )}

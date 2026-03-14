@@ -11,9 +11,9 @@ import {
     ScrollText, ArrowRight, ArrowLeft, Check, 
     Rocket, Target, Users, Search, Loader2, 
     AlertCircle, Info, Calendar, Globe, Clock,
-    CheckCircle2, Plus, Save, Hash, X
+    CheckCircle2, Plus, Save, Hash, X, Building2
 } from 'lucide-react';
-import { OrgLookupModal } from '../../components/OrgLookupModal';
+import OrgSearchModal from '../../components/OrgSearchModal';
 
 const STEPS = [
     { id: 'action', title: 'Action selection', icon: Target },
@@ -368,7 +368,7 @@ export default function NewProposalWizard() {
                                                         <button 
                                                             type="button"
                                                             onClick={() => setIsLookupModalOpen(true)}
-                                                            className="text-[8px] font-black text-orange-600 hover:text-orange-700 flex items-center gap-1 uppercase tracking-tighter"
+                                                            className="text-[8px] font-black text-blue-600 hover:text-blue-700 flex items-center gap-1 uppercase tracking-tighter"
                                                         >
                                                             <Search size={10} /> Search EC Database →
                                                         </button>
@@ -508,8 +508,8 @@ export default function NewProposalWizard() {
                 </main>
             </div>
 
-            <OrgLookupModal 
-                isOpen={isLookupModalOpen}
+            <OrgSearchModal 
+                open={isLookupModalOpen}
                 onClose={() => setIsLookupModalOpen(false)}
                 onSelect={handleOrgSelect}
             />
