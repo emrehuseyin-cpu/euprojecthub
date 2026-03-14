@@ -14,6 +14,8 @@ import {
     Info,
     HelpCircle,
     AlertCircle,
+    AlertTriangle,
+    BookOpen,
     Calendar,
     Users,
     Wallet,
@@ -71,27 +73,13 @@ export default function NewProjectPage() {
     const partnerCount = watch('partnerCount');
 
     useEffect(() => {
-        setIsLoadingActions(true);
         supabase
             .from('erasmus_actions')
-            .select(`
-                code, name_en, key_action, managing_body, deadline_round1, 
-                deadline_round2, min_partners, min_countries, budget_type, 
-                budget_options, min_budget_eur, max_budget_eur, 
-                requires_eche, requires_accreditation, funding_rate_pct
-            `)
+            .select('code, name_en, key_action, managing_body, deadline_round1, deadline_round2, min_partners, min_countries, budget_type, budget_options, min_budget_eur, max_budget_eur, requires_eche, requires_accreditation, funding_rate_pct')
             .eq('year', 2026)
             .order('key_action')
             .order('code')
-            .then(({ data, error }) => {
-                if (error) {
-                    console.error('Error fetching actions:', error);
-                    trackError(error, { context: 'fetch_erasmus_actions' });
-                } else {
-                    setErasmusActions(data || []);
-                }
-                setIsLoadingActions(false);
-            });
+            .then(({ data }) => setErasmusActions(data || []));
     }, []);
 
     const grouped = useMemo(() => erasmusActions.reduce((acc, a) => {
@@ -104,7 +92,7 @@ export default function NewProjectPage() {
         KA1: 'KA1 — Learning Mobility',
         KA2: 'KA2 — Cooperation', 
         KA3: 'KA3 — Policy Support',
-        JM:  'JM — Jean Monnet',
+        JM:  'Jean Monnet',
     };
 
     function handleProgrammeSelect(code: string) {
@@ -261,25 +249,22 @@ export default function NewProjectPage() {
                                         </label>
                                         <select
                                             id="programme_type"
+                                            name="programme_type"
                                             className={`w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all bg-white cursor-pointer ${errors.programme_type ? 'border-red-300' : 'border-gray-200'}`}
                                             value={programmeType}
                                             onChange={e => handleProgrammeSelect(e.target.value)}
                                         >
                                             <option value="">— Select a programme —</option>
+                                            {Object.entries(grouped).map(([ka, acts]: any) => (
+                                                <optgroup key={ka} label={KA_LABELS[ka] || ka}>
+                                                    {acts.map((a: any) => (
+                                                        <option key={a.code} value={a.code}>
+                                                            {a.code} — {a.name_en}
+                                                        </option>
+                                                    ))}
+                                                </optgroup>
+                                            ))}
                                             <option value="other">Other / Custom Fund</option>
-                                            {isLoadingActions ? (
-                                                <option disabled>Loading programmes...</option>
-                                            ) : (
-                                                Object.entries(grouped).map(([ka, acts]: any) => (
-                                                    <optgroup key={ka} label={KA_LABELS[ka] || ka}>
-                                                        {acts.map((a: any) => (
-                                                            <option key={a.code} value={a.code}>
-                                                                {a.code} — {a.name_en}
-                                                            </option>
-                                                        ))}
-                                                    </optgroup>
-                                                ))
-                                            )}
                                         </select>
                                         {errors.programme_type && <p className="mt-1.5 text-xs text-red-600 font-medium ml-1">{errors.programme_type.message}</p>}
                                     </div>
@@ -304,77 +289,65 @@ export default function NewProjectPage() {
                                         }
                                         
                                         return (
-                                            <div className="mt-3 p-5 bg-blue-50/50 border border-blue-100 rounded-2xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider flex items-center gap-1.5">
-                                                        <Info size={14} />
-                                                        Programme Rules
-                                                    </span>
-                                                    <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold tracking-tight ${
-                                                        action.managing_body === 'EACEA' 
-                                                            ? 'bg-purple-100/80 text-purple-700' 
-                                                            : 'bg-green-100/80 text-green-700'
-                                                    }`}>
-                                                        {action.managing_body === 'EACEA' ? '🏛️ EACEA' : '🏠 National Agency'}
-                                                    </span>
+                                            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                <div className="flex items-start justify-between">
+                                                    <div>
+                                                        <h4 className="font-bold text-indigo-900 flex items-center gap-2">
+                                                            <BookOpen className="w-4 h-4" /> Programme Rules: {action.code}
+                                                        </h4>
+                                                        <p className="text-xs text-indigo-600 mt-1 font-medium">{action.name_en}</p>
+                                                    </div>
+                                                    {daysLeft !== null && (
+                                                        <div className={`px-4 py-2 rounded-xl border text-center font-bold ${daysLeft < 30 ? 'bg-red-50 border-red-100 text-red-600' : 'bg-white border-indigo-100 text-indigo-600'}`}>
+                                                            <div className="text-[10px] uppercase tracking-widest opacity-70 leading-none mb-1 text-inherit">Deadline</div>
+                                                            <div className="text-lg leading-none">{daysLeft} Days</div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                                                    {action.deadline_round1 && (
-                                                        <div className="bg-white/80 p-3 rounded-xl border border-blue-50">
-                                                            <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Deadline</span>
-                                                            <span className={`font-bold ${daysLeft !== null && daysLeft <= 30 ? 'text-red-600' : 'text-gray-800'}`}>
-                                                                {action.deadline_round1} 2026
-                                                                {daysLeft !== null && ` (${daysLeft}d left)`}
-                                                            </span>
+
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                    <div className="bg-white/60 p-3 rounded-xl border border-indigo-50">
+                                                        <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider block mb-1">Partners & Countries</span>
+                                                        <p className="text-sm font-bold text-gray-900">
+                                                            Min {action.min_partners || 0} Partners • {action.min_countries || 0} Countries
+                                                        </p>
+                                                    </div>
+                                                    <div className="bg-white/60 p-3 rounded-xl border border-indigo-50">
+                                                        <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider block mb-1">Budget Type</span>
+                                                        <p className="text-sm font-bold text-gray-900 uppercase">
+                                                            {action.budget_type.replace('_', ' ')}
+                                                        </p>
+                                                    </div>
+                                                    <div className="bg-white/60 p-3 rounded-xl border border-indigo-50">
+                                                        <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider block mb-1">Managing Body</span>
+                                                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-[10px] font-black w-fit mt-1">
+                                                            {action.managing_body} {action.managing_body === 'EACEA' ? '(External)' : '(National Agency)'}
                                                         </div>
-                                                    )}
-                                                    {action.min_partners && (
-                                                        <div className="bg-white/80 p-3 rounded-xl border border-blue-50">
-                                                            <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Min Partnership</span>
-                                                            <span className="font-bold text-gray-800">{action.min_partners} orgs from {action.min_countries} countries</span>
-                                                        </div>
-                                                    )}
-                                                    {action.budget_options?.length > 0 && (
-                                                        <div className="col-span-full bg-white/80 p-3 rounded-xl border border-blue-50">
-                                                            <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Budget Options</span>
-                                                            <span className="font-bold text-blue-600">
-                                                                {action.budget_options.map((b: number) => '€' + b.toLocaleString()).join(' / ')}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                    {action.max_budget_eur && !action.budget_options?.length && (
-                                                        <div className="bg-white/80 p-3 rounded-xl border border-blue-50">
-                                                            <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Max EU Grant</span>
-                                                            <span className="font-bold text-gray-800">€{action.max_budget_eur.toLocaleString()}</span>
-                                                        </div>
-                                                    )}
-                                                    <div className="bg-white/80 p-3 rounded-xl border border-blue-50">
-                                                        <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Funding Rate</span>
-                                                        <span className="font-bold text-gray-800">{action.funding_rate_pct}%</span>
                                                     </div>
                                                 </div>
-                                                
-                                                <div className="space-y-2">
-                                                    {action.requires_eche && (
-                                                        <div className="text-[11px] text-amber-700 bg-amber-50/80 border border-amber-100 rounded-xl p-2.5 flex items-start gap-2">
-                                                            <AlertCircle size={14} className="mt-0.5 shrink-0" />
-                                                            <span>Erasmus Charter for Higher Education (ECHE) required for all EU HEIs.</span>
-                                                        </div>
-                                                    )}
-                                                    {action.requires_accreditation && (
-                                                        <div className="text-[11px] text-amber-700 bg-amber-50/80 border border-amber-100 rounded-xl p-2.5 flex items-start gap-2">
-                                                            <AlertCircle size={14} className="mt-0.5 shrink-0" />
-                                                            <span>Valid Erasmus Accreditation required before applying.</span>
-                                                        </div>
-                                                    )}
-                                                    {action.managing_body === 'EACEA' && (
-                                                        <div className="text-[11px] text-purple-700 bg-purple-50/80 border border-purple-100 rounded-xl p-2.5 flex items-start gap-2">
-                                                            <Building2 size={14} className="mt-0.5 shrink-0" />
-                                                            <span>Central call — apply via EU Funding & Tenders Portal, not via National Agency.</span>
-                                                        </div>
-                                                    )}
-                                                </div>
+
+                                                {(action.requires_eche || action.requires_accreditation || action.managing_body === 'EACEA') && (
+                                                    <div className="space-y-2">
+                                                        {action.requires_eche && (
+                                                            <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl text-amber-700">
+                                                                <AlertTriangle size={18} className="shrink-0" />
+                                                                <span className="text-xs font-bold leading-tight">Erasmus Charter for Higher Education (ECHE) Required</span>
+                                                            </div>
+                                                        )}
+                                                        {action.requires_accreditation && (
+                                                            <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl text-amber-700">
+                                                                <AlertTriangle size={18} className="shrink-0" />
+                                                                <span className="text-xs font-bold leading-tight">Specific Erasmus Accreditation Required</span>
+                                                            </div>
+                                                        )}
+                                                        {action.managing_body === 'EACEA' && (
+                                                            <div className="flex items-center gap-3 p-3 bg-purple-50 border border-purple-100 rounded-xl text-purple-700 font-bold">
+                                                                <Building2 size={18} className="shrink-0" />
+                                                                <span className="text-xs leading-tight">Apply via EU Funding & Tenders Portal, not via National Agency.</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         );
                                     })()}

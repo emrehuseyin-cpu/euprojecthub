@@ -7,8 +7,7 @@ import {
     LayoutDashboard, FolderKanban, Activity, UsersRound,
     Wallet, FileSignature, Users, Link as LinkIcon,
     GraduationCap, FileText, Zap, Bot, MessageSquare, Settings,
-    ChevronLeft, ChevronRight, Building2, UserCog, ShieldCheck,
-    Euro
+    ChevronLeft, ChevronRight, Building2, UserCog, ShieldCheck
 } from 'lucide-react';
 import { useLanguage, type TranslationKey } from '../lib/i18n';
 import { useAuth } from '../lib/AuthContext';
@@ -137,7 +136,7 @@ export function Sidebar() {
                                             <Icon size={18} className={`flex-shrink-0 ${active ? color : 'text-slate-500 group-hover:text-slate-300'}`} />
                                             {!collapsed && (
                                                 <span className={active ? 'text-white font-semibold flex-1' : 'text-slate-400 group-hover:text-white flex-1'}>
-                                                    {labelKey === 'nav_erasmus' as any ? 'Erasmus+ 2026' : t(labelKey)}
+                                                    {t(labelKey)}
                                                 </span>
                                             )}
                                             {!collapsed && badge && (

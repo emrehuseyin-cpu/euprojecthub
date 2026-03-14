@@ -5,8 +5,8 @@ import Link from 'next/link';
 import {
     ArrowLeft, Settings, Calendar, Wallet, Activity, Users, FileText,
     GraduationCap, BookOpen, ExternalLink, Loader2, Plus, Download,
-    MapPin, BarChart3, CheckCircle2, Clock, AlertCircle, X, FileSignature, Link as LinkIcon, Sparkles,
-    Bot, Info, HelpCircle
+    MapPin, BarChart3, CheckCircle2, Clock, AlertCircle, AlertTriangle, X, FileSignature, Link as LinkIcon, Sparkles,
+    Building2, Bot, Info, HelpCircle
 } from 'lucide-react';
 import { Sidebar } from '../../components/Sidebar';
 import { Header } from '../../components/Header';
@@ -494,93 +494,65 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
                                 {/* Erasmus Rules Box */}
                                 {selectedAction && (
-                                    <div className="bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border border-blue-100 shadow-sm overflow-hidden">
-                                        <div className="bg-blue-600 px-5 py-3 flex items-center justify-between">
-                                            <h3 className="font-bold text-white flex items-center gap-2">
-                                                <Info size={18} />
-                                                Programme Rules & Guidelines
-                                            </h3>
-                                            <span className="text-[10px] font-bold bg-blue-500/50 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                {selectedAction.code}
-                                            </span>
+                                    <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <h4 className="font-bold text-indigo-900 flex items-center gap-2">
+                                                    <BookOpen className="w-4 h-4" /> Programme Rules: {selectedAction.code}
+                                                </h4>
+                                                <p className="text-xs text-indigo-600 mt-1 font-medium">{selectedAction.name_en}</p>
+                                            </div>
+                                            {selectedAction.deadline_round1 && (
+                                                <div className="px-4 py-2 rounded-xl bg-white border border-indigo-100 text-center font-bold text-indigo-600 shadow-sm">
+                                                    <div className="text-[10px] uppercase tracking-widest opacity-70 leading-none mb-1">Next Deadline</div>
+                                                    <div className="text-lg leading-none">{selectedAction.deadline_round1} 2026</div>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="p-5">
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <strong className="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1.5">⏳ Upcoming Deadline</strong>
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600">
-                                                                <Clock size={16} />
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-bold text-gray-900">{selectedAction.deadline_round1} 2026</p>
-                                                                <p className="text-[11px] text-gray-500">at {selectedAction.deadline_time}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <strong className="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1.5">🏢 Managing Body</strong>
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                                                                <Settings size={16} />
-                                                            </div>
-                                                            <p className="text-sm font-bold text-gray-900">
-                                                                {selectedAction.managing_body === 'NA' ? 'National Agency' : 'EACEA Portal'}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
 
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <strong className="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1.5">👥 Partnership Rules</strong>
-                                                        <div className="space-y-2">
-                                                            <div className="flex justify-between text-sm py-1 border-b border-gray-50">
-                                                                <span className="text-gray-500">Min Partners:</span>
-                                                                <span className="font-bold text-gray-900">{selectedAction.min_partners || 1}</span>
-                                                            </div>
-                                                            <div className="flex justify-between text-sm py-1 border-b border-gray-50">
-                                                                <span className="text-gray-500">Min Countries:</span>
-                                                                <span className="font-bold text-gray-900">{selectedAction.min_countries || 1}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <strong className="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1.5">💰 Budget Logic</strong>
-                                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${selectedAction.budget_type === 'lump_sum' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                                                            {selectedAction.budget_type === 'lump_sum' ? 'Lump Sum (Götürü)' : 'Unit Costs (Birim Maliyet)'}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100">
-                                                    <strong className="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-3">⚠️ Compulsory Checks</strong>
-                                                    <div className="space-y-3">
-                                                        <div className="flex items-start gap-2">
-                                                            <CheckCircle2 size={14} className={selectedAction.requires_eche ? 'text-amber-500' : 'text-gray-300'} />
-                                                            <span className={`text-[11px] leading-tight ${selectedAction.requires_eche ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
-                                                                ECHE Accreditation Required
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex items-start gap-2">
-                                                            <CheckCircle2 size={14} className={selectedAction.requires_accreditation ? 'text-amber-500' : 'text-gray-300'} />
-                                                            <span className={`text-[11px] leading-tight ${selectedAction.requires_accreditation ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
-                                                                Erasmus Accreditation Required
-                                                            </span>
-                                                        </div>
-                                                        <div className="mt-4 pt-3 border-t border-gray-200">
-                                                            <Link 
-                                                                href="/budget?tab=calculator" 
-                                                                className="text-blue-600 text-xs font-bold hover:underline flex items-center gap-1"
-                                                            >
-                                                                Open Budget Calculator <ArrowLeft size={10} className="rotate-180" />
-                                                            </Link>
-                                                        </div>
-                                                    </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            <div className="bg-white/60 p-4 rounded-xl border border-indigo-50 shadow-sm">
+                                                <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider block mb-1">Partners & Countries</span>
+                                                <p className="text-sm font-bold text-gray-900">
+                                                    Min {selectedAction.min_partners || 0} Partners • {selectedAction.min_countries || 0} Countries
+                                                </p>
+                                            </div>
+                                            <div className="bg-white/60 p-4 rounded-xl border border-indigo-50 shadow-sm">
+                                                <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider block mb-1">Budget Type</span>
+                                                <p className="text-sm font-bold text-gray-900 uppercase">
+                                                    {selectedAction.budget_type.replace('_', ' ')}
+                                                </p>
+                                            </div>
+                                            <div className="bg-white/60 p-4 rounded-xl border border-indigo-50 shadow-sm">
+                                                <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider block mb-1">Managing Body</span>
+                                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-[10px] font-black w-fit mt-1">
+                                                    {selectedAction.managing_body} {selectedAction.managing_body === 'EACEA' ? '(External)' : '(National Agency)'}
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {(selectedAction.requires_eche || selectedAction.requires_accreditation || selectedAction.managing_body === 'EACEA') && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                {selectedAction.requires_eche && (
+                                                    <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl text-amber-700">
+                                                        <AlertTriangle size={18} className="shrink-0" />
+                                                        <span className="text-xs font-bold leading-tight">Erasmus Charter for Higher Education (ECHE) Required</span>
+                                                    </div>
+                                                )}
+                                                {selectedAction.requires_accreditation && (
+                                                    <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl text-amber-700">
+                                                        <AlertTriangle size={18} className="shrink-0" />
+                                                        <span className="text-xs font-bold leading-tight">Specific Erasmus Accreditation Required</span>
+                                                    </div>
+                                                )}
+                                                {selectedAction.managing_body === 'EACEA' && (
+                                                    <div className="flex items-center gap-3 p-3 bg-purple-50 border border-purple-100 rounded-xl text-purple-700 font-bold md:col-span-2">
+                                                        <Building2 size={18} className="shrink-0" />
+                                                        <span className="text-xs leading-tight">Central call — apply via EU Funding & Tenders Portal, not via National Agency.</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
