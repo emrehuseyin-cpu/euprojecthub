@@ -6,3 +6,4 @@ export declare function isAtLeast(current: Role | undefined, target: Role): bool
 export * from './types';
 export * from './erasmus/rules';
 export * from './erasmus/validator';
+export * from './eutenders/api';

@@ -11,12 +11,12 @@
 
 [33m[1m⚠[22m[39m The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
 [37m[1m [22m[39m Creating an optimized production build ...
-[32m[1m✓[22m[39m Compiled successfully in 6.2s
-[?25l[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m.[39m[2K[1G[1A[2K[1G[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m..[39m[2K[1G[1A[2K[1G[?25h[32m[1m✓[22m[39m Completed runAfterProductionCompile in 370ms
-[?25l [36m.[39m [2K[1G[?25h[?25l[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[?25h[?25l[37m[1m [22m[39m Finished TypeScript in 3.3s  [36m.[39m[2K[1G[?25h[37m[1m [22m[39m Finished TypeScript in 3.3s    [32m[1m✓[22m[39m Finished TypeScript in 3.3s 
-[?25l[37m[1m [22m[39m Collecting page data using 9 workers  [36m.[39m[2K[1G[1A[2K[1G[37m[1m [22m[39m Collecting page data using 9 workers  [36m..[39m[2K[1G[1A[2K[1G[?25h[37m[1m [22m[39m Collecting page data using 9 workers in 301.1ms    [32m[1m✓[22m[39m Collecting page data using 9 workers in 301.1ms 
-[?25l[37m[1m [22m[39m Generating static pages using 9 workers (0/54)  [36m[    ][39m[2K[1G[1A[2K[1G[37m[1m [22m[39m Generating static pages using 9 workers (5/54)  [36m[=   ][39m[2K[1G[1A[2K[1G[?25h[32m[1m✓[22m[39m Generating static pages using 9 workers (54/54) in 374.8ms
-[?25l[37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G[37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G[?25h[37m[1m [22m[39m Finalizing page optimization in 290.0ms    [32m[1m✓[22m[39m Finalizing page optimization in 290.0ms 
+[32m[1m✓[22m[39m Compiled successfully in 4.8s
+[?25l[37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m.[39m[2K[1G[1A[2K[1G[?25h[32m[1m✓[22m[39m Completed runAfterProductionCompile in 136ms
+[?25l [36m.[39m [2K[1G[?25h[?25l[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[?25h[?25l[37m[1m [22m[39m Finished TypeScript in 3.1s  [36m.[39m[2K[1G[?25h[37m[1m [22m[39m Finished TypeScript in 3.1s    [32m[1m✓[22m[39m Finished TypeScript in 3.1s 
+[?25l[37m[1m [22m[39m Collecting page data using 9 workers  [36m.[39m[2K[1G[1A[2K[1G[37m[1m [22m[39m Collecting page data using 9 workers  [36m..[39m[2K[1G[1A[2K[1G[?25h[37m[1m [22m[39m Collecting page data using 9 workers in 287.0ms    [32m[1m✓[22m[39m Collecting page data using 9 workers in 287.0ms 
+[?25l[37m[1m [22m[39m Generating static pages using 9 workers (0/56)  [36m[    ][39m[2K[1G[1A[2K[1G[37m[1m [22m[39m Generating static pages using 9 workers (43/56)  [36m[=   ][39m[2K[1G[1A[2K[1G[?25h[32m[1m✓[22m[39m Generating static pages using 9 workers (56/56) in 233.8ms
+[?25l[37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G[37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G[?25h[37m[1m [22m[39m Finalizing page optimization in 302.1ms    [32m[1m✓[22m[39m Finalizing page optimization in 302.1ms 
 
 [4mRoute (app)[24m
 ┌ ƒ /
@@ -40,6 +40,7 @@
 ├ ƒ /api/auth/signout
 ├ ƒ /api/cron/check-erasmus-guide
 ├ ƒ /api/erasmus/analyze
+├ ƒ /api/eu-tenders
 ├ ƒ /api/proposals/draft
 ├ ƒ /api/sentry-example-api
 ├ ƒ /auth/callback
@@ -47,6 +48,7 @@
 ├ ○ /budget/new
 ├ ○ /contracts
 ├ ○ /contracts/new
+├ ○ /eu-calls
 ├ ƒ /invite/[token]
 ├ ○ /lms
 ├ ○ /login

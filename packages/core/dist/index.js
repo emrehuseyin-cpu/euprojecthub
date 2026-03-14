@@ -30,3 +30,4 @@ function isAtLeast(current, target) {
 __exportStar(require("./types"), exports);
 __exportStar(require("./erasmus/rules"), exports);
 __exportStar(require("./erasmus/validator"), exports);
+__exportStar(require("./eutenders/api"), exports);

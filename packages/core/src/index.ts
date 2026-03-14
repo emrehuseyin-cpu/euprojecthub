@@ -19,3 +19,4 @@ export function isAtLeast(current: Role | undefined, target: Role): boolean {
 export * from './types';
 export * from './erasmus/rules';
 export * from './erasmus/validator';
+export * from './eutenders/api';

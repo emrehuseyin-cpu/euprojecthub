@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import { Sidebar } from '../../components/Sidebar';
 import { Header } from '../../components/Header';
-import { Building, ArrowLeft, Search, Loader2, CheckCircle2, AlertCircle, Save, X, Globe, MapPin, Mail, Hash, Info } from 'lucide-react';
+import { Building, ArrowLeft, Search, Loader2, CheckCircle2, AlertCircle, Save, X, Globe, MapPin, Mail, Hash, Info, Sparkles } from 'lucide-react';
 import { useLanguage } from '../../lib/i18n';
+import { getOrganisationByPIC } from '@euprojecthub/core';
 
 export default function NewOrganisationPage() {
     const router = useRouter();
@@ -15,7 +16,9 @@ export default function NewOrganisationPage() {
 
     const [loading, setLoading] = useState(false);
     const [searchingOid, setSearchingOid] = useState(false);
+    const [searchingPic, setSearchingPic] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [picSuccess, setPicSuccess] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const [form, setForm] = useState({
@@ -37,6 +40,33 @@ export default function NewOrganisationPage() {
 
     const handleSearchEC = () => {
         window.open('https://webgate.ec.europa.eu/erasmus-esc/index/organisations/search-for-an-organisation', '_blank');
+    };
+
+    const handlePicLookup = async (pic: string) => {
+        if (!/^\d{9}$/.test(pic)) return;
+        setSearchingPic(true);
+        setPicSuccess(null);
+        setError(null);
+
+        try {
+            const data = await getOrganisationByPIC(pic);
+            if (data) {
+                setForm(f => ({
+                    ...f,
+                    pic: data.pic,
+                    legal_name: data.name,
+                    city: data.city || f.city,
+                    country: data.country || f.country,
+                }));
+                setPicSuccess(`Found: ${data.name} from ${data.city}, ${data.country}`);
+            } else {
+                setError("Organisation not found on EU Portal. Please check the PIC.");
+            }
+        } catch (err) {
+            setError("Failed to fetch from EU Portal.");
+        } finally {
+            setSearchingPic(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -165,33 +195,52 @@ export default function NewOrganisationPage() {
                                 <div>
                                     <div className="flex items-center justify-between px-1 mb-2">
                                         <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">PIC Number</label>
-                                        {form.pic && isPicValid && (
-                                            <a 
-                                                href={`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/how-to-participate/org-details/${form.pic}`}
-                                                target="_blank"
-                                                className="text-[9px] font-black text-blue-600 hover:underline uppercase tracking-tighter"
-                                            >
-                                                Verify on EC website ↗
-                                            </a>
+                                        {(form.pic && isPicValid) && (
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => handlePicLookup(form.pic)}
+                                                    className="text-[9px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-tighter flex items-center gap-1"
+                                                >
+                                                    <Sparkles size={10} /> Auto-fill Details
+                                                </button>
+                                                <a 
+                                                    href={`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/how-to-participate/org-details/${form.pic}`}
+                                                    target="_blank"
+                                                    className="text-[9px] font-black text-blue-600 hover:underline uppercase tracking-tighter"
+                                                >
+                                                    Verify ↗
+                                                </a>
+                                            </div>
                                         )}
                                     </div>
                                     <div className="relative">
                                         <Hash className={`absolute left-4 top-4 transition-colors ${form.pic ? (isPicValid ? 'text-emerald-500' : 'text-red-500') : 'text-gray-300'}`} size={18} />
                                         <input 
                                             type="text"
-                                            className={`w-full pl-12 pr-12 py-4 bg-gray-50 border rounded-2xl focus:bg-white focus:ring-4 outline-none transition-all font-bold text-gray-900 ${form.pic ? (isPicValid ? 'border-emerald-100 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-red-100 focus:ring-red-500/10 focus:border-red-500') : 'border-gray-100 focus:ring-indigo-500/10 focus:border-indigo-500'}`}
+                                            disabled={searchingPic}
+                                            className={`w-full pl-12 pr-12 py-4 bg-gray-50 border rounded-2xl focus:bg-white focus:ring-4 outline-none transition-all font-bold text-gray-900 ${form.pic ? (isPicValid ? 'border-emerald-100 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-red-100 focus:ring-red-500/10 focus:border-red-500') : 'border-gray-100 focus:ring-indigo-500/10 focus:border-indigo-500'} disabled:opacity-50`}
                                             placeholder="9 digits (e.g. 949123456)"
                                             value={form.pic}
                                             onChange={e => setForm({...form, pic: e.target.value.replace(/\D/g, '').slice(0, 9)})}
                                         />
-                                        {form.pic && (
+                                        {searchingPic ? (
+                                            <div className="absolute right-4 top-4">
+                                                <Loader2 size={18} className="text-blue-500 animate-spin" />
+                                            </div>
+                                        ) : form.pic && (
                                             <div className="absolute right-4 top-4">
                                                 {isPicValid ? <CheckCircle2 size={18} className="text-emerald-500" /> : <AlertCircle size={18} className="text-red-500" />}
                                             </div>
                                         )}
                                     </div>
+                                    {picSuccess && (
+                                        <p className="mt-2 px-1 text-[9px] text-emerald-600 font-bold leading-relaxed flex items-center gap-1 italic">
+                                            <CheckCircle2 size={10} /> {picSuccess}
+                                        </p>
+                                    )}
                                     <p className="mt-2 px-1 text-[9px] text-gray-400 font-medium leading-relaxed">
-                                        9 digits, no letters. Required for some Erasmus+ and Horizon programs.
+                                        9 digits, no letters. Auto-fill from EU Portal enabled once valid.
                                     </p>
                                 </div>
 

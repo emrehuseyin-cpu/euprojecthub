@@ -28,6 +28,11 @@ const ErasmusDeadlineWidget = dynamic(() => import('./components/ErasmusDeadline
   loading: () => <div className="h-48 bg-white/50 animate-pulse rounded-2xl" />
 });
 
+const EUCallsWidget = dynamic(() => import('./components/dashboard/EUCallsWidget'), {
+  ssr: false,
+  loading: () => <div className="h-48 bg-white/50 animate-pulse rounded-[2rem]" />
+});
+
 const PieChart = dynamic(() => import('recharts').then(mod => mod.PieChart), { ssr: false });
 const Pie = dynamic(() => import('recharts').then(mod => mod.Pie), { ssr: false });
 const Cell = dynamic(() => import('recharts').then(mod => mod.Cell), { ssr: false });
@@ -427,10 +432,13 @@ export default function DashboardClient({
               </div>
             </div>
 
-            {/* ─── ROW 3: Erasmus+ Deadlines ─── */}
+            {/* ─── ROW 3: Erasmus+ Deadlines & Live EU Calls ─── */}
             <div className={`grid grid-cols-1 xl:grid-cols-2 gap-5 transition-all duration-700 delay-400 mt-5 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <div className="xl:col-span-1">
                 <ErasmusDeadlineWidget />
+              </div>
+              <div className="xl:col-span-1">
+                <EUCallsWidget />
               </div>
             </div>
 

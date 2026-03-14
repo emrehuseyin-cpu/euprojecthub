@@ -24,6 +24,7 @@ const translations = {
         nav_organizations: 'Organizations',
         nav_proposals: 'Proposals',
         nav_org_registry: 'Organisation Registry',
+        nav_eu_calls: 'EU Calls',
 
         // Nav groups
         group_general: 'General',
@@ -189,6 +190,7 @@ const translations = {
         nav_organizations: 'Organizasyonlar',
         nav_proposals: 'Teklifler',
         nav_org_registry: 'Organizasyon Kaydı',
+        nav_eu_calls: 'AB Çağrıları',
 
         group_general: 'Genel',
         group_project_mgmt: 'Proje Yönetimi',
@@ -345,6 +347,7 @@ const translations = {
         nav_organizations: 'Organisationen',
         nav_proposals: 'Vorschläge',
         nav_org_registry: 'Organisationsregister',
+        nav_eu_calls: 'EU-Aufrufe',
 
         group_general: 'Allgemein',
         group_project_mgmt: 'Projektmanagement',
@@ -453,6 +456,7 @@ const translations = {
         nav_workflows: 'Flux de travail', nav_ai_assistant: 'Assistant IA',
         nav_feedback: 'Commentaires', nav_settings: 'Paramètres',
         nav_users: 'Membres', nav_organizations: 'Organisations',
+        nav_eu_calls: 'Appels UE',
 
         group_general: 'Général', group_project_mgmt: 'Gestion de projet',
         group_finance: 'Finance', group_partnership: 'Partenariat',
@@ -532,6 +536,7 @@ const translations = {
         nav_workflows: 'Flujos de trabajo', nav_ai_assistant: 'Asistente IA',
         nav_feedback: 'Comentarios', nav_settings: 'Configuración',
         nav_users: 'Miembros', nav_organizations: 'Organizaciones',
+        nav_eu_calls: 'Convocatorias UE',
 
         group_general: 'General', group_project_mgmt: 'Gestión de proyectos',
         group_finance: 'Finanzas', group_partnership: 'Asociación',

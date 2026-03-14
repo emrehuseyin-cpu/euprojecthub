@@ -8,7 +8,7 @@ import {
     Wallet, FileSignature, Users, Link as LinkIcon,
     GraduationCap, FileText, Zap, Bot, MessageSquare, Settings,
     ChevronLeft, ChevronRight, Building2, UserCog, ShieldCheck,
-    ScrollText, Building
+    ScrollText, Building, Globe
 } from 'lucide-react';
 import { useLanguage, type TranslationKey } from '../lib/i18n';
 import { useAuth } from '../lib/AuthContext';
@@ -54,6 +54,7 @@ const navGroups: Array<{
             labelKey: 'group_content',
             items: [
                 { href: '/lms', labelKey: 'nav_lms', icon: GraduationCap, color: 'text-indigo-400', activeBg: 'bg-indigo-500/10' },
+                { href: '/eu-calls', labelKey: 'nav_eu_calls', icon: Globe, color: 'text-blue-400', activeBg: 'bg-blue-500/10', badge: 'Live' },
                 { href: '/reports', labelKey: 'nav_reports', icon: FileText, color: 'text-yellow-400', activeBg: 'bg-yellow-500/10' },
             ]
         },
