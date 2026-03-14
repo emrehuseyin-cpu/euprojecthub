@@ -13,6 +13,7 @@ import {
     AlertCircle, Info, Calendar, Globe, Clock,
     CheckCircle2, Plus, Save, Hash, X
 } from 'lucide-react';
+import { OrgLookupModal } from '../../components/OrgLookupModal';
 
 const STEPS = [
     { id: 'action', title: 'Action selection', icon: Target },
@@ -49,6 +50,7 @@ export default function NewProposalWizard() {
         type: 'NGO'
     });
     const [quickAddLoading, setQuickAddLoading] = useState(false);
+    const [isLookupModalOpen, setIsLookupModalOpen] = useState(false);
 
     const oidRegex = /^E\d{8}$/;
     const picRegex = /^\d{9}$/;
@@ -104,6 +106,16 @@ export default function NewProposalWizard() {
             alert(error.message);
         }
         setQuickAddLoading(false);
+    };
+
+    const handleOrgSelect = (selectedOrg: any) => {
+        setQuickAddForm(prev => ({
+            ...prev,
+            legal_name: selectedOrg.name,
+            pic: selectedOrg.pic,
+            country: selectedOrg.country,
+        }));
+        setIsLookupModalOpen(false);
     };
 
     const grouped = actions.reduce((acc, a) => {
@@ -351,7 +363,16 @@ export default function NewProposalWizard() {
                                         <div className="mb-6 p-6 bg-blue-50/30 border border-blue-100 rounded-[2rem] space-y-4 animate-in slide-in-from-top-4 duration-300">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-[9px] font-black text-blue-900/40 uppercase tracking-widest mb-1.5 px-1">Legal Name</label>
+                                                    <div className="flex items-center justify-between mb-1.5 px-1">
+                                                        <label className="block text-[9px] font-black text-blue-900/40 uppercase tracking-widest">Legal Name</label>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => setIsLookupModalOpen(true)}
+                                                            className="text-[8px] font-black text-orange-600 hover:text-orange-700 flex items-center gap-1 uppercase tracking-tighter"
+                                                        >
+                                                            <Search size={10} /> Search EC Database →
+                                                        </button>
+                                                    </div>
                                                     <input 
                                                         type="text"
                                                         placeholder="Organisation Name..."
@@ -486,6 +507,12 @@ export default function NewProposalWizard() {
                     </div>
                 </main>
             </div>
+
+            <OrgLookupModal 
+                isOpen={isLookupModalOpen}
+                onClose={() => setIsLookupModalOpen(false)}
+                onSelect={handleOrgSelect}
+            />
             
             <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 5px; }

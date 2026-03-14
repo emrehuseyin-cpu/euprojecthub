@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import { Sidebar } from '../../components/Sidebar';
 import { Header } from '../../components/Header';
-import { Building, ArrowLeft, Search, Loader2, CheckCircle2, AlertCircle, Save, X, Globe, MapPin, Mail, Hash, Info, Sparkles } from 'lucide-react';
+import { Building, ArrowLeft, Search, Loader2, CheckCircle2, AlertCircle, Save, X, Globe, MapPin, Mail, Hash, Info, Sparkles, Wand2 } from 'lucide-react';
 import { useLanguage } from '../../lib/i18n';
 import { getOrganisationByPIC } from '@euprojecthub/core';
+import { OrgLookupModal } from '../../components/OrgLookupModal';
 
 export default function NewOrganisationPage() {
     const router = useRouter();
@@ -20,6 +21,8 @@ export default function NewOrganisationPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [picSuccess, setPicSuccess] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isLookupModalOpen, setIsLookupModalOpen] = useState(false);
+    const [showSuccessToast, setShowSuccessToast] = useState<string | null>(null);
 
     const [form, setForm] = useState({
         oid: '',
@@ -69,6 +72,21 @@ export default function NewOrganisationPage() {
         }
     };
 
+    const handleOrgSelect = async (selectedOrg: any) => {
+        setForm(prev => ({
+            ...prev,
+            legal_name: selectedOrg.name,
+            pic: selectedOrg.pic,
+            city: selectedOrg.city,
+            country: selectedOrg.country,
+            registrationNum: selectedOrg.registrationNum || '',
+            vat: selectedOrg.vat || '',
+        }));
+        
+        setShowSuccessToast(`Organisation selected: ${selectedOrg.name}`);
+        setTimeout(() => setShowSuccessToast(null), 3000);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -104,23 +122,23 @@ export default function NewOrganisationPage() {
                         </div>
 
                         {/* External Lookup Tool */}
-                        <div className="bg-amber-500/5 border border-amber-500/10 rounded-[2rem] p-8 mb-8">
+                        <div className="bg-orange-500/5 border border-orange-500/10 rounded-[2rem] p-8 mb-8">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div className="flex-1">
-                                    <h4 className="flex items-center gap-2 text-amber-700 font-black text-sm uppercase tracking-wider mb-2">
+                                    <h4 className="flex items-center gap-2 text-orange-700 font-black text-sm uppercase tracking-wider mb-2">
                                         <Search size={16} /> Official EC Database
                                     </h4>
-                                    <p className="text-[10px] text-amber-600 font-bold max-w-sm">
+                                    <p className="text-[10px] text-orange-600 font-bold max-w-sm">
                                         Search the official EC database, find your partner, then copy their OID and PIC back here.
                                     </p>
                                 </div>
                                 <button 
                                     type="button"
-                                    onClick={handleSearchEC}
+                                    onClick={() => setIsLookupModalOpen(true)}
                                     title="Search the official EC database, then copy the OID back here"
-                                    className="px-8 py-4 bg-amber-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-amber-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
-                                    <Globe size={18} />
-                                    Search EC Database ↗
+                                    className="px-8 py-4 bg-orange-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                    <Search size={18} />
+                                    Search EC Database 🧪
                                 </button>
                             </div>
                         </div>
@@ -129,7 +147,16 @@ export default function NewOrganisationPage() {
                         <form onSubmit={handleSubmit} className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl p-8 md:p-12 space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="md:col-span-2">
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Legal Name</label>
+                                    <div className="flex items-center justify-between px-1 mb-2">
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Legal Name</label>
+                                        <button 
+                                            type="button"
+                                            onClick={() => setIsLookupModalOpen(true)}
+                                            className="text-[9px] font-black text-orange-600 hover:text-orange-700 flex items-center gap-1 uppercase tracking-tighter"
+                                        >
+                                            <Search size={10} /> Search by name instead →
+                                        </button>
+                                    </div>
                                     <div className="relative">
                                         <Building className="absolute left-4 top-4 text-gray-300" size={18} />
                                         <input 
@@ -336,6 +363,23 @@ export default function NewOrganisationPage() {
                     </div>
                 </main>
             </div>
+
+            <OrgLookupModal 
+                isOpen={isLookupModalOpen}
+                onClose={() => setIsLookupModalOpen(false)}
+                onSelect={handleOrgSelect}
+            />
+
+            {showSuccessToast && (
+                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-bottom-8 duration-500">
+                    <div className="bg-gray-900/95 backdrop-blur-md text-white px-8 py-4 rounded-[1.5rem] shadow-2xl flex items-center gap-3 border border-white/10">
+                        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                            <CheckCircle2 size={18} />
+                        </div>
+                        <p className="text-sm font-black tracking-tight">{showSuccessToast}</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
