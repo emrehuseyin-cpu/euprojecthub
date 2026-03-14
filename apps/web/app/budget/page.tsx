@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
+import ErasmusBudgetCalculator from '../components/ErasmusBudgetCalculator';
 import { supabase } from '../lib/supabase';
 import {
     PieChart,
@@ -27,6 +28,7 @@ export default function BudgetPage() {
     const [data, setData] = useState<any>({ projects: [], categories: [] });
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [activeTab, setActiveTab] = useState<'overview' | 'calculator'>('overview');
 
     const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444']; // Blue, Emerald, Amber, Purple, Red
 
@@ -123,13 +125,29 @@ export default function BudgetPage() {
                                 </h2>
                                 <p className="text-gray-500 mt-1">Platform genelinde proje bütçelerini ve harcama kategorilerini takip edin.</p>
                             </div>
-                            <Link
-                                href="/budget/new"
-                                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors shadow-sm shadow-blue-600/20"
-                            >
-                                <Plus size={20} />
-                                <span>Yeni Harcama Ekle</span>
-                            </Link>
+                            <div className="flex items-center gap-3">
+                                <div className="bg-white p-1 rounded-xl border border-gray-200 shadow-sm flex">
+                                    <button 
+                                        onClick={() => setActiveTab('overview')}
+                                        className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'overview' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'}`}
+                                    >
+                                        Harcama Özeti
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveTab('calculator')}
+                                        className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'calculator' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'}`}
+                                    >
+                                        Bütçe Hesaplayıcı
+                                    </button>
+                                </div>
+                                <Link
+                                    href="/budget/new"
+                                    className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors shadow-sm shadow-blue-600/20"
+                                >
+                                    <Plus size={20} />
+                                    <span>Yeni Harcama Ekle</span>
+                                </Link>
+                            </div>
                         </div>
 
                         {loading ? (
@@ -137,7 +155,7 @@ export default function BudgetPage() {
                                 <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-4" />
                                 <p className="text-gray-500 font-medium">Bütçe verileri hesaplanıyor...</p>
                             </div>
-                        ) : (
+                        ) : activeTab === 'overview' ? (
                             <div className="space-y-8">
                                 {/* Global Stats & Charts */}
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -276,6 +294,10 @@ export default function BudgetPage() {
                                         </div>
                                     )}
                                 </div>
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                                <ErasmusBudgetCalculator />
                             </div>
                         )}
 

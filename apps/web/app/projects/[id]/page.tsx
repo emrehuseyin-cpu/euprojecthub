@@ -101,6 +101,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
     const [erasmusReport, setErasmusReport] = useState<string | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
     const [erasmusLoading, setErasmusLoading] = useState(false);
+    const [selectedAction, setSelectedAction] = useState<any>(null);
 
     // Activity status filter
     const [activityFilter, setActivityFilter] = useState('All');
@@ -120,6 +121,16 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         try {
             const { data } = await supabase.from('projects').select('*').eq('id', id).single();
             setProject(data);
+            
+            // If it's an Erasmus project, fetch action details
+            if (data?.program) {
+                const { data: actionData } = await supabase
+                    .from('erasmus_actions')
+                    .select('*')
+                    .eq('code', data.program)
+                    .single();
+                if (actionData) setSelectedAction(actionData);
+            }
         } finally {
             setLoading(false);
         }
@@ -478,6 +489,98 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                                         <h3 className="font-bold text-gray-900 border-l-4 border-blue-400 pl-3 mb-3">Project Description</h3>
                                         <p className="text-sm text-gray-600 leading-relaxed">{project.description}</p>
+                                    </div>
+                                )}
+
+                                {/* Erasmus Rules Box */}
+                                {selectedAction && (
+                                    <div className="bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border border-blue-100 shadow-sm overflow-hidden">
+                                        <div className="bg-blue-600 px-5 py-3 flex items-center justify-between">
+                                            <h3 className="font-bold text-white flex items-center gap-2">
+                                                <Info size={18} />
+                                                Programme Rules & Guidelines
+                                            </h3>
+                                            <span className="text-[10px] font-bold bg-blue-500/50 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                                {selectedAction.code}
+                                            </span>
+                                        </div>
+                                        <div className="p-5">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <strong className="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1.5">⏳ Upcoming Deadline</strong>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600">
+                                                                <Clock size={16} />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-bold text-gray-900">{selectedAction.deadline_round1} 2026</p>
+                                                                <p className="text-[11px] text-gray-500">at {selectedAction.deadline_time}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <strong className="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1.5">🏢 Managing Body</strong>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                                                                <Settings size={16} />
+                                                            </div>
+                                                            <p className="text-sm font-bold text-gray-900">
+                                                                {selectedAction.managing_body === 'NA' ? 'National Agency' : 'EACEA Portal'}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <strong className="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1.5">👥 Partnership Rules</strong>
+                                                        <div className="space-y-2">
+                                                            <div className="flex justify-between text-sm py-1 border-b border-gray-50">
+                                                                <span className="text-gray-500">Min Partners:</span>
+                                                                <span className="font-bold text-gray-900">{selectedAction.min_partners || 1}</span>
+                                                            </div>
+                                                            <div className="flex justify-between text-sm py-1 border-b border-gray-50">
+                                                                <span className="text-gray-500">Min Countries:</span>
+                                                                <span className="font-bold text-gray-900">{selectedAction.min_countries || 1}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <strong className="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1.5">💰 Budget Logic</strong>
+                                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${selectedAction.budget_type === 'lump_sum' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                                            {selectedAction.budget_type === 'lump_sum' ? 'Lump Sum (Götürü)' : 'Unit Costs (Birim Maliyet)'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                                                    <strong className="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-3">⚠️ Compulsory Checks</strong>
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-start gap-2">
+                                                            <CheckCircle2 size={14} className={selectedAction.requires_eche ? 'text-amber-500' : 'text-gray-300'} />
+                                                            <span className={`text-[11px] leading-tight ${selectedAction.requires_eche ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
+                                                                ECHE Accreditation Required
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-start gap-2">
+                                                            <CheckCircle2 size={14} className={selectedAction.requires_accreditation ? 'text-amber-500' : 'text-gray-300'} />
+                                                            <span className={`text-[11px] leading-tight ${selectedAction.requires_accreditation ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
+                                                                Erasmus Accreditation Required
+                                                            </span>
+                                                        </div>
+                                                        <div className="mt-4 pt-3 border-t border-gray-200">
+                                                            <Link 
+                                                                href="/budget?tab=calculator" 
+                                                                className="text-blue-600 text-xs font-bold hover:underline flex items-center gap-1"
+                                                            >
+                                                                Open Budget Calculator <ArrowLeft size={10} className="rotate-180" />
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>

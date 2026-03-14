@@ -7,7 +7,8 @@ import {
     LayoutDashboard, FolderKanban, Activity, UsersRound,
     Wallet, FileSignature, Users, Link as LinkIcon,
     GraduationCap, FileText, Zap, Bot, MessageSquare, Settings,
-    ChevronLeft, ChevronRight, Building2, UserCog, ShieldCheck
+    ChevronLeft, ChevronRight, Building2, UserCog, ShieldCheck,
+    Euro
 } from 'lucide-react';
 import { useLanguage, type TranslationKey } from '../lib/i18n';
 import { useAuth } from '../lib/AuthContext';
@@ -17,7 +18,7 @@ import { ROLE_COLORS, ROLE_LABELS } from '../lib/permissions';
 const navGroups: Array<{
     labelKey: TranslationKey;
     minRole?: string;
-    items: Array<{ href: string; labelKey: TranslationKey; icon: React.ElementType; color: string; activeBg: string; minRole?: string }>;
+    items: Array<{ href: string; labelKey: TranslationKey; icon: React.ElementType; color: string; activeBg: string; minRole?: string; badge?: string }>;
 }> = [
         {
             labelKey: 'group_general',
@@ -119,7 +120,7 @@ export function Sidebar() {
                             )}
                             {collapsed && gi > 0 && <div className="my-2 mx-3 border-t border-white/10" />}
                             <div className={`${collapsed ? 'px-2 space-y-0.5' : 'px-3 space-y-0.5'}`}>
-                                {visibleItems.map(({ href, labelKey, icon: Icon, color, activeBg }) => {
+                                {visibleItems.map(({ href, labelKey, icon: Icon, color, activeBg, badge }) => {
                                     const active = isActive(href);
                                     return (
                                         <Link
@@ -135,8 +136,13 @@ export function Sidebar() {
                                         >
                                             <Icon size={18} className={`flex-shrink-0 ${active ? color : 'text-slate-500 group-hover:text-slate-300'}`} />
                                             {!collapsed && (
-                                                <span className={active ? 'text-white font-semibold' : 'text-slate-400 group-hover:text-white'}>
-                                                    {t(labelKey)}
+                                                <span className={active ? 'text-white font-semibold flex-1' : 'text-slate-400 group-hover:text-white flex-1'}>
+                                                    {labelKey === 'nav_erasmus' as any ? 'Erasmus+ 2026' : t(labelKey)}
+                                                </span>
+                                            )}
+                                            {!collapsed && badge && (
+                                                <span className="text-[10px] font-bold bg-white/10 text-white px-1.5 py-0.5 rounded ml-1 shrink-0">
+                                                    {badge}
                                                 </span>
                                             )}
                                         </Link>

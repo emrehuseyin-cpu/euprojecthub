@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import {
     LayoutDashboard, Building2, Users, Palette, Settings,
     PuzzleIcon, MessageSquare, BarChart3, GitBranch,
-    ArrowLeft, ShieldCheck
+    ArrowLeft, ShieldCheck, Globe
 } from 'lucide-react';
 
 const adminNav = [
@@ -20,6 +20,7 @@ const adminNav = [
     { href: '/admin/modules', label: 'Modules', icon: PuzzleIcon },
     { href: '/admin/feedback', label: 'Feedback', icon: MessageSquare },
     { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+    { href: '/admin/erasmus', label: 'Erasmus Monitor', icon: Globe },
     { href: '/admin/versions', label: 'Versions', icon: GitBranch },
 ];
 

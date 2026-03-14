@@ -7,12 +7,12 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 // Standard client for non-auth operations (backwards compat)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// SSR-aware browser client with cookie-based sessions
+// SSR-aware browser client
 export function createSupabaseBrowserClient() {
     return createBrowserClient(supabaseUrl, supabaseAnonKey);
 }
 
-// Auth helper functions
+// Auth helper functions (Browser)
 export async function getCurrentUser() {
     const client = createSupabaseBrowserClient();
     const { data: { user } } = await client.auth.getUser();

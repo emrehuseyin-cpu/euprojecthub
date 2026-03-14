@@ -55,3 +55,4 @@ next-env.d.ts
 # IDE
 .vscode
 .idea
+.env*.local

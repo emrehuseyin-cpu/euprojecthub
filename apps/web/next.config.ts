@@ -5,6 +5,17 @@ const nextConfig: NextConfig = {
   /* config options here */
   // Required to support PostHog trailing slash API requests
   skipTrailingSlashRedirect: true,
+  output: 'standalone',
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'date-fns',
+      'recharts',
+      'react-markdown',
+      'framer-motion',
+      '@tanstack/react-query',
+    ],
+  },
   async redirects() {
     return [
       { source: '/projeler', destination: '/projects', permanent: true },

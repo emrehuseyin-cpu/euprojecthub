@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { createSupabaseBrowserClient } from '../lib/supabase';
 import {
     CheckCircle2, XCircle, Loader2, Database, Globe, Cpu,
@@ -170,6 +171,22 @@ export default function AdminOverviewPage() {
                         </div>
                     ))}
                 </div>
+            </div>
+
+            {/* Erasmus Monitor Quick Access */}
+            <div className="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-indigo-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                        <Globe size={24} />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-bold text-white">Erasmus+ 2026 Monitor</h3>
+                        <p className="text-sm text-slate-400">Track all Erasmus+ actions, rules, and live integration health.</p>
+                    </div>
+                </div>
+                <Link href="/admin/erasmus" className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-600/20">
+                    Open Monitor
+                </Link>
             </div>
 
             {/* Recent Activity */}
