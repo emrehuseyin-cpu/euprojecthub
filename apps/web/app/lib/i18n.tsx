@@ -161,6 +161,11 @@ const translations = {
 
         // Header search
         header_search: 'Search projects, partners...',
+
+        // Notifications
+        header_notifications: 'Notifications',
+        header_mark_read: 'Mark all as read',
+        header_no_notifs: 'No new notifications',
     },
 
     tr: {
@@ -312,6 +317,9 @@ const translations = {
         feedback_general: 'Genel',
 
         header_search: 'Proje veya ortak ara...',
+        header_notifications: 'Bildirimler',
+        header_mark_read: 'Tümünü okundu olarak işaretle',
+        header_no_notifs: 'Yeni bildirim yok',
     },
 
     de: {
@@ -425,6 +433,9 @@ const translations = {
         feedback_bug: 'Fehler', feedback_suggestion: 'Vorschlag',
         feedback_improvement: 'Verbesserung', feedback_general: 'Allgemein',
         header_search: 'Projekte, Partner suchen...',
+        header_notifications: 'Benachrichtigungen',
+        header_mark_read: 'Alle als gelesen markieren',
+        header_no_notifs: 'Keine neuen Benachrichtigungen',
     },
 
     fr: {
@@ -501,6 +512,9 @@ const translations = {
         feedback_bug: 'Bug', feedback_suggestion: 'Suggestion',
         feedback_improvement: 'Amélioration', feedback_general: 'Général',
         header_search: 'Rechercher projets, partenaires...',
+        header_notifications: 'Notifications',
+        header_mark_read: 'Tout marquer comme lu',
+        header_no_notifs: 'Aucune nouvelle notification',
     },
 
     es: {
@@ -577,6 +591,9 @@ const translations = {
         feedback_bug: 'Error', feedback_suggestion: 'Sugerencia',
         feedback_improvement: 'Mejora', feedback_general: 'General',
         header_search: 'Buscar proyectos, socios...',
+        header_notifications: 'Notificaciones',
+        header_mark_read: 'Marcar todo como leído',
+        header_no_notifs: 'No hay nuevas notificaciones',
     },
 } as const;
 

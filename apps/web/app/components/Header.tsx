@@ -14,6 +14,16 @@ export function Header() {
     const { displayName, initials, orgName, role } = useAuth();
     const [showLangMenu, setShowLangMenu] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [showNotifMenu, setShowNotifMenu] = useState(false);
+
+    // Dummy notifications for initial UI implementation
+    const [notifications, setNotifications] = useState([
+        { id: 1, text: 'Welcome to EU Project Hub!', time: '1m ago', read: false },
+        { id: 2, text: 'System maintenance scheduled for tonight.', time: '2h ago', read: false },
+        { id: 3, text: 'New partner added to "Green Future" project.', time: '1d ago', read: true }
+    ]);
+    const unreadCount = notifications.filter(n => !n.read).length;
+
     const currentLang = languages.find(l => l.code === locale) || languages[0];
     const router = useRouter();
 
@@ -47,7 +57,7 @@ export function Header() {
             <div className="flex items-center gap-3">
                 {/* Language Selector */}
                 <div className="relative">
-                    <button onClick={() => { setShowLangMenu(!showLangMenu); setShowUserMenu(false); }}
+                    <button onClick={() => { setShowLangMenu(!showLangMenu); setShowUserMenu(false); setShowNotifMenu(false); }}
                         className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-600 transition-colors">
                         <Globe size={14} className="text-gray-400" />
                         <span>{currentLang.label}</span>
@@ -69,14 +79,64 @@ export function Header() {
                 </div>
 
                 {/* Notifications */}
-                <button className="relative p-2.5 text-gray-500 hover:bg-gray-100 rounded-xl transition-colors">
-                    <Bell size={18} />
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
-                </button>
+                <div className="relative">
+                    <button
+                        onClick={() => { setShowNotifMenu(!showNotifMenu); setShowLangMenu(false); setShowUserMenu(false); }}
+                        className={`relative p-2.5 rounded-xl transition-colors ${showNotifMenu ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:bg-gray-100'}`}
+                    >
+                        <Bell size={18} />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+                        )}
+                    </button>
+
+                    {showNotifMenu && (
+                        <>
+                            <div className="fixed inset-0 z-40" onClick={() => setShowNotifMenu(false)} />
+                            <div className="absolute right-0 top-14 w-80 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                                <div className="px-4 py-2 border-b border-gray-50 flex items-center justify-between">
+                                    <h3 className="text-sm font-bold text-gray-900">{t('header_notifications')}</h3>
+                                    {unreadCount > 0 && (
+                                        <button
+                                            onClick={() => setNotifications(notifications.map(n => ({ ...n, read: true })))}
+                                            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                                        >
+                                            {t('header_mark_read')}
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="max-h-80 overflow-y-auto">
+                                    {notifications.length > 0 ? (
+                                        notifications.map(notif => (
+                                            <div
+                                                key={notif.id}
+                                                className={`px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors flex gap-3 ${notif.read ? 'opacity-60' : ''}`}
+                                            >
+                                                {!notif.read && (
+                                                    <div className="mt-1.5 w-2 h-2 rounded-full bg-indigo-500 shrink-0" />
+                                                )}
+                                                <div className={notif.read ? 'ml-5' : ''}>
+                                                    <p className={`text-sm ${notif.read ? 'text-gray-600' : 'text-gray-900 font-medium'}`}>
+                                                        {notif.text}
+                                                    </p>
+                                                    <p className="text-xs text-gray-400 mt-1">{notif.time}</p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                                            {t('header_no_notifs')}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
 
                 {/* User Dropdown */}
                 <div className="relative">
-                    <button onClick={() => { setShowUserMenu(!showUserMenu); setShowLangMenu(false); }}
+                    <button onClick={() => { setShowUserMenu(!showUserMenu); setShowLangMenu(false); setShowNotifMenu(false); }}
                         className="flex items-center gap-2.5 pl-3 border-l border-gray-100 cursor-pointer hover:opacity-80 transition-opacity">
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-indigo-100"
                             style={{ background: 'linear-gradient(135deg, #4F6EF7, #818CF8)' }}>
