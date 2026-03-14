@@ -1,197 +1,302 @@
 'use client';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createSupabaseBrowserClient } from '../lib/supabase';
 import {
-    LayoutDashboard, FolderKanban, Activity, UsersRound,
-    Wallet, FileSignature, Users, Link as LinkIcon,
-    GraduationCap, FileText, Zap, Bot, MessageSquare, Settings,
-    ChevronLeft, ChevronRight, Building2, UserCog, ShieldCheck,
-    ScrollText, Building, Globe
+  LayoutDashboard,
+  FileText,
+  Globe,
+  Building2,
+  FolderKanban,
+  DollarSign,
+  Activity,
+  Users,
+  Bot,
+  BarChart3,
+  GraduationCap,
+  Download,
+  UserCircle,
+  Settings,
+  ShieldAlert,
+  LogOut,
+  Menu,
+  X,
 } from 'lucide-react';
-import { useLanguage, type TranslationKey } from '../lib/i18n';
-import { useAuth } from '../lib/AuthContext';
-import { isAtLeast } from '../lib/permissions';
-import { ROLE_COLORS, ROLE_LABELS } from '../lib/permissions';
 
-const navGroups: Array<{
-    labelKey: TranslationKey;
-    minRole?: string;
-    items: Array<{ href: string; labelKey: TranslationKey; icon: React.ElementType; color: string; activeBg: string; minRole?: string; badge?: string }>;
-}> = [
-        {
-            labelKey: 'group_general',
-            items: [
-                { href: '/', labelKey: 'nav_dashboard', icon: LayoutDashboard, color: 'text-blue-400', activeBg: 'bg-blue-500/10' },
-            ]
-        },
-        {
-            labelKey: 'group_project_mgmt',
-            items: [
-                { href: '/projects', labelKey: 'nav_projects', icon: FolderKanban, color: 'text-emerald-400', activeBg: 'bg-emerald-500/10' },
-                { href: '/proposals', labelKey: 'nav_proposals', icon: ScrollText, color: 'text-blue-400', activeBg: 'bg-blue-500/10' },
-                { href: '/activities', labelKey: 'nav_activities', icon: Activity, color: 'text-orange-400', activeBg: 'bg-orange-500/10' },
-                { href: '/participants', labelKey: 'nav_participants', icon: UsersRound, color: 'text-pink-400', activeBg: 'bg-pink-500/10' },
-            ]
-        },
-        {
-            labelKey: 'group_finance',
-            items: [
-                { href: '/budget', labelKey: 'nav_budget', icon: Wallet, color: 'text-red-400', activeBg: 'bg-red-500/10' },
-                { href: '/contracts', labelKey: 'nav_contracts', icon: FileSignature, color: 'text-slate-400', activeBg: 'bg-slate-500/10' },
-            ]
-        },
-        {
-            labelKey: 'group_partnership',
-            items: [
-                { href: '/partners', labelKey: 'nav_partners', icon: Users, color: 'text-purple-400', activeBg: 'bg-purple-500/10' },
-                { href: '/organisations', labelKey: 'nav_org_registry', icon: Building, color: 'text-amber-400', activeBg: 'bg-amber-500/10' },
-                { href: '/webgate', labelKey: 'nav_webgate', icon: LinkIcon, color: 'text-teal-400', activeBg: 'bg-teal-500/10' },
-            ]
-        },
-        {
-            labelKey: 'group_content',
-            items: [
-                { href: '/lms', labelKey: 'nav_lms', icon: GraduationCap, color: 'text-indigo-400', activeBg: 'bg-indigo-500/10' },
-                { href: '/eu-calls', labelKey: 'nav_eu_calls', icon: Globe, color: 'text-blue-400', activeBg: 'bg-blue-500/10', badge: 'Live' },
-                { href: '/reports', labelKey: 'nav_reports', icon: FileText, color: 'text-yellow-400', activeBg: 'bg-yellow-500/10' },
-            ]
-        },
-        {
-            labelKey: 'group_automation',
-            items: [
-                { href: '/workflows', labelKey: 'nav_workflows', icon: Zap, color: 'text-cyan-400', activeBg: 'bg-cyan-500/10' },
-                { href: '/ai-assistant', labelKey: 'nav_ai_assistant', icon: Bot, color: 'text-violet-400', activeBg: 'bg-violet-500/10' },
-            ]
-        },
-        {
-            labelKey: 'group_system',
-            items: [
-                { href: '/users', labelKey: 'nav_users', icon: UserCog, color: 'text-amber-400', activeBg: 'bg-amber-500/10', minRole: 'org_admin' },
-                { href: '/organizations', labelKey: 'nav_organizations', icon: Building2, color: 'text-rose-400', activeBg: 'bg-rose-500/10', minRole: 'super_admin' },
-                { href: '/settings/feedback', labelKey: 'nav_feedback', icon: MessageSquare, color: 'text-sky-400', activeBg: 'bg-sky-500/10' },
-                { href: '/settings', labelKey: 'nav_settings', icon: Settings, color: 'text-gray-400', activeBg: 'bg-gray-500/10' },
-            ]
-        },
-    ];
+interface NavItem {
+  href: string;
+  icon: any;
+  label: string;
+  badge?: string;
+  superAdminOnly?: boolean;
+}
+
+interface NavGroup {
+  label?: string;
+  adminOnly?: boolean;
+  items: NavItem[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    items: [
+      { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    ],
+  },
+  {
+    label: 'Proposals',
+    items: [
+      { href: '/proposals', icon: FileText, label: 'Proposals' },
+      { href: '/eu-calls', icon: Globe, label: 'EU Calls', badge: 'Live' },
+      { href: '/organisations', icon: Building2, label: 'Org Registry' },
+    ],
+  },
+  {
+    label: 'Projects',
+    items: [
+      { href: '/projects', icon: FolderKanban, label: 'Projects' },
+      { href: '/budget', icon: DollarSign, label: 'Budget' },
+      { href: '/activities', icon: Activity, label: 'Activities' },
+      { href: '/participants', icon: Users, label: 'Participants' },
+    ],
+  },
+  {
+    label: 'Tools',
+    items: [
+      { href: '/ai-assistant', icon: Bot, label: 'AI Assistant' },
+      { href: '/reports', icon: BarChart3, label: 'Reports' },
+      { href: '/lms', icon: GraduationCap, label: 'LMS' },
+      { href: '/webgate', icon: Download, label: 'Webgate Export' },
+    ],
+  },
+  {
+    label: 'Admin',
+    adminOnly: false,
+    items: [
+      { href: '/users', icon: UserCircle, label: 'Team Members' },
+      { href: '/settings', icon: Settings, label: 'Settings' },
+      { href: '/admin', icon: ShieldAlert, label: 'Admin Panel', superAdminOnly: true },
+    ],
+  },
+];
+
+const SIDEBAR_BG = 'rgb(15, 23, 42)';
+const ACTIVE_BG = 'rgba(79, 110, 247, 0.18)';
+const ACTIVE_ICON = '#818CF8';
+const INACTIVE_TEXT = 'rgba(148, 163, 184, 0.75)';
+const INACTIVE_ICON = 'rgba(148, 163, 184, 0.5)';
+const DIVIDER = 'rgba(255,255,255,0.07)';
+const GROUP_LABEL = 'rgba(148,163,184,0.4)';
 
 export function Sidebar() {
-    const pathname = usePathname();
-    const [collapsed, setCollapsed] = useState(false);
-    const { t } = useLanguage();
-    const { role, displayName, initials, orgName } = useAuth();
+  const pathname = usePathname();
+  const supabase = createSupabaseBrowserClient();
+  const [profile, setProfile] = useState<any>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-    const isActive = (href: string) =>
-        href === '/' ? pathname === '/' : pathname.startsWith(href);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', data.user.id)
+        .single()
+        .then(({ data: p }) => setProfile(p));
+    });
+  }, []);
 
-    return (
-        <aside
-            className="flex-shrink-0 hidden md:flex flex-col transition-all duration-300 relative"
-            style={{ width: collapsed ? '64px' : '240px', background: '#1E2A4A' }}
+  function isActive(href: string) {
+    if (href === '/') return pathname === '/';
+    return pathname.startsWith(href);
+  }
+
+  const isSuperAdmin = profile?.role === 'super_admin';
+
+  function handleSignOut() {
+    supabase.auth.signOut().then(() => {
+      window.location.href = '/login';
+    });
+  }
+
+  const Content = () => (
+    <div
+      className="flex flex-col h-full select-none"
+      style={{ background: SIDEBAR_BG }}
+    >
+      {/* ── Logo ── */}
+      <div
+        className="flex items-center gap-3 px-5 flex-shrink-0"
+        style={{ height: 64, borderBottom: `1px solid ${DIVIDER}` }}
+      >
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs text-white flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg,#4F6EF7,#818CF8)' }}
         >
-            {/* Logo */}
-            <div className={`flex items-center border-b border-white/10 h-16 flex-shrink-0 ${collapsed ? 'justify-center px-3' : 'px-5 gap-3'}`}>
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-xs flex-shrink-0"
-                    style={{ background: 'linear-gradient(135deg, #4F6EF7, #818CF8)' }}>
-                    EU
-                </div>
-                {!collapsed && (
-                    <span className="text-lg font-bold text-white tracking-tight whitespace-nowrap">
-                        Project<span style={{ color: '#4F6EF7' }}>Hub</span>
-                    </span>
-                )}
-            </div>
+          EU
+        </div>
+        <span className="text-white font-semibold text-[15px] tracking-tight whitespace-nowrap">
+          Project<span style={{ color: '#818CF8' }}>Hub</span>
+        </span>
+      </div>
 
-            {/* Navigation Groups */}
-            <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden">
-                {navGroups.map((group, gi) => {
-                    // Filter items by role
-                    const visibleItems = group.items.filter(item =>
-                        !item.minRole || isAtLeast(role, item.minRole as any)
-                    );
-                    if (visibleItems.length === 0) return null;
+      {/* ── Nav ── */}
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-4">
+        {NAV_GROUPS.map((group, gi) => {
+          const visibleItems = group.items.filter(
+            (item) => !('superAdminOnly' in item && item.superAdminOnly && !isSuperAdmin)
+          );
+          if (!visibleItems.length) return null;
 
-                    return (
-                        <div key={group.labelKey} className={gi > 0 ? 'mt-1' : ''}>
-                            {!collapsed && (
-                                <div className={`${gi > 0 ? 'mt-4 mb-1 pt-3 border-t border-white/[0.07]' : 'mb-1'} px-4`}>
-                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                        {t(group.labelKey)}
-                                    </p>
-                                </div>
-                            )}
-                            {collapsed && gi > 0 && <div className="my-2 mx-3 border-t border-white/10" />}
-                            <div className={`${collapsed ? 'px-2 space-y-0.5' : 'px-3 space-y-0.5'}`}>
-                                {visibleItems.map(({ href, labelKey, icon: Icon, color, activeBg, badge }) => {
-                                    const active = isActive(href);
-                                    return (
-                                        <Link
-                                            key={href}
-                                            href={href}
-                                            title={collapsed ? t(labelKey) : undefined}
-                                            className={`flex items-center rounded-xl text-sm font-medium transition-all group
-                                                ${collapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'}
-                                                ${active
-                                                    ? `${activeBg} border-l-2 border-[#4F6EF7] ${collapsed ? 'border-l-0 border-2' : 'pl-[10px]'}`
-                                                    : 'hover:bg-white/5 border-l-2 border-transparent'
-                                                }`}
-                                        >
-                                            <Icon size={18} className={`flex-shrink-0 ${active ? color : 'text-slate-500 group-hover:text-slate-300'}`} />
-                                            {!collapsed && (
-                                                <span className={active ? 'text-white font-semibold flex-1' : 'text-slate-400 group-hover:text-white flex-1'}>
-                                                    {t(labelKey)}
-                                                </span>
-                                            )}
-                                            {!collapsed && badge && (
-                                                <span className="text-[10px] font-bold bg-white/10 text-white px-1.5 py-0.5 rounded ml-1 shrink-0">
-                                                    {badge}
-                                                </span>
-                                            )}
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    );
-                })}
-            </nav>
+          return (
+            <div key={gi}>
+              {group.label && (
+                <p
+                  className="px-3 mb-1 text-[10px] font-bold tracking-widest uppercase"
+                  style={{ color: GROUP_LABEL }}
+                >
+                  {group.label}
+                </p>
+              )}
+              <div className="space-y-0.5">
+                {visibleItems.map((item) => {
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-3 py-[7px] rounded-lg text-[13px] transition-all relative"
+                      style={{
+                        color: active ? '#f1f5f9' : INACTIVE_TEXT,
+                        background: active ? ACTIVE_BG : 'transparent',
+                        fontWeight: active ? 500 : 400,
+                      }}
+                    >
+                      {/* Left active bar */}
+                      {active && (
+                        <span
+                          className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full"
+                          style={{
+                            width: 3,
+                            height: 18,
+                            background: '#818CF8',
+                          }}
+                        />
+                      )}
 
-            {/* Admin Panel Link — super_admin only */}
-            {role === 'super_admin' && (
-                <div className={`${collapsed ? 'px-2 pb-1' : 'px-3 pb-1'}`}>
-                    <Link href="/admin" title={collapsed ? 'Admin Panel' : undefined}
-                        className={`flex items-center rounded-xl text-xs font-bold transition-all group border border-red-500/20 bg-red-500/5 hover:bg-red-500/10
-                            ${collapsed ? 'justify-center p-2.5' : 'gap-2 px-3 py-2'}`}>
-                        <ShieldCheck size={15} className="text-red-400 flex-shrink-0" />
-                        {!collapsed && <span className="text-red-400">Admin Panel</span>}
-                    </Link>
-                </div>
-            )}
+                      <item.icon
+                        size={15}
+                        style={{
+                          color: active ? ACTIVE_ICON : INACTIVE_ICON,
+                          flexShrink: 0,
+                        }}
+                      />
 
-            {/* User Footer */}
-            {!collapsed && (
-                <div className="border-t border-white/10 p-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                        style={{ background: 'linear-gradient(135deg, #4F6EF7, #818CF8)' }}>
-                        {initials}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-white truncate">{displayName}</p>
-                        <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full border mt-0.5 ${ROLE_COLORS[role] || ROLE_COLORS.member}`}>
-                            {ROLE_LABELS[role] || role}
+                      <span className="flex-1 truncate">{item.label}</span>
+
+                      {'badge' in item && item.badge && (
+                        <span
+                          className="text-[9px] font-bold px-1.5 py-0.5 rounded-full tracking-wide"
+                          style={{
+                            background: 'rgba(34,197,94,0.15)',
+                            color: '#4ade80',
+                          }}
+                        >
+                          {item.badge}
                         </span>
-                    </div>
-                </div>
-            )}
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </nav>
 
-            {/* Collapse Toggle */}
-            <button
-                onClick={() => setCollapsed(!collapsed)}
-                className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#1E2A4A] border border-white/20 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:border-white/40 transition-all shadow-lg z-50"
+      {/* ── User footer ── */}
+      <div
+        className="px-3 py-3 flex-shrink-0"
+        style={{ borderTop: `1px solid ${DIVIDER}` }}
+      >
+        <div
+          className="flex items-center gap-2.5 px-2 py-2 rounded-lg"
+          style={{ background: 'rgba(255,255,255,0.04)' }}
+        >
+          {/* Avatar */}
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold text-white flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg,#4F6EF7,#818CF8)' }}
+          >
+            {profile
+              ? (profile.full_name || profile.email || 'U')[0].toUpperCase()
+              : '?'}
+          </div>
+
+          {/* Name + role */}
+          <div className="flex-1 min-w-0">
+            <p
+              className="text-[12px] font-medium truncate"
+              style={{ color: 'rgba(248,250,252,0.85)' }}
             >
-                {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
-            </button>
-        </aside>
-    );
+              {profile?.full_name || profile?.email || '—'}
+            </p>
+            <p
+              className="text-[10px] capitalize truncate"
+              style={{ color: 'rgba(148,163,184,0.55)' }}
+            >
+              {profile?.role?.replace(/_/g, ' ') || 'member'}
+            </p>
+          </div>
+
+          {/* Sign out */}
+          <button
+            onClick={handleSignOut}
+            title="Sign out"
+            className="p-1 rounded transition-colors hover:bg-white/10"
+          >
+            <LogOut size={13} style={{ color: 'rgba(148,163,184,0.45)' }} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* ── Desktop ── */}
+      <aside
+        className="hidden md:flex flex-col flex-shrink-0"
+        style={{ width: 220, minHeight: '100vh' }}
+      >
+        <Content />
+      </aside>
+
+      {/* ── Mobile hamburger ── */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 w-9 h-9 rounded-lg flex items-center justify-center text-white"
+        style={{ background: SIDEBAR_BG }}
+        onClick={() => setMobileOpen((v) => !v)}
+        aria-label="Toggle menu"
+      >
+        {mobileOpen ? <X size={16} /> : <Menu size={16} />}
+      </button>
+
+      {/* ── Mobile drawer ── */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-40 flex">
+          <div className="flex flex-col flex-shrink-0" style={{ width: 220 }}>
+            <Content />
+          </div>
+          <div
+            className="flex-1"
+            style={{ background: 'rgba(0,0,0,0.5)' }}
+            onClick={() => setMobileOpen(false)}
+          />
+        </div>
+      )}
+    </>
+  );
 }
