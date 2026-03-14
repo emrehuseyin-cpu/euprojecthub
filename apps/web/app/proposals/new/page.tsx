@@ -10,7 +10,8 @@ import { Header } from '../../components/Header';
 import { 
     ScrollText, ArrowRight, ArrowLeft, Check, 
     Rocket, Target, Users, Search, Loader2, 
-    AlertCircle, Info, Calendar, Globe, Clock
+    AlertCircle, Info, Calendar, Globe, Clock,
+    CheckCircle2, Plus, Save, Hash, X
 } from 'lucide-react';
 
 const STEPS = [
@@ -39,50 +40,71 @@ export default function NewProposalWizard() {
         selectedOrgs: [] as string[]
     });
 
+    const [showQuickAdd, setShowQuickAdd] = useState(false);
+    const [quickAddForm, setQuickAddForm] = useState({
+        legal_name: '',
+        oid: '',
+        pic: '',
+        country: '',
+        type: 'NGO'
+    });
+    const [quickAddLoading, setQuickAddLoading] = useState(false);
+
+    const oidRegex = /^E\d{8}$/;
+    const picRegex = /^\d{9}$/;
+    const isOidValid = oidRegex.test(quickAddForm.oid);
+    const isPicValid = picRegex.test(quickAddForm.pic);
+
+    async function loadOrgs() {
+        setLoadingOrgs(true);
+        try {
+            const { data, error } = await supabase
+                .from('org_registry')
+                .select('*')
+                .order('legal_name');
+            if (data) setOrgs(data);
+        } finally {
+            setLoadingOrgs(false);
+        }
+    }
+
     useEffect(() => {
         async function load() {
             setLoadingActions(true);
             try {
-                console.log('Wizard: Fetching Erasmus actions for 2026...');
                 const { data: actionsData, error: actionsError } = await supabase
                     .from('erasmus_actions')
                     .select('*')
                     .eq('year', 2026)
                     .order('code');
-                
-                if (actionsError) {
-                    console.error('Wizard: Error fetching actions:', actionsError);
-                    trackError(actionsError, { context: 'fetch_actions_wizard' });
-                } else {
-                    console.log(`Wizard: Fetched ${actionsData?.length || 0} actions:`, actionsData);
-                    if (actionsData) setActions(actionsData);
-                }
-            } catch (err) {
-                console.error('Wizard: Failed to load actions:', err);
+                if (actionsData) setActions(actionsData);
             } finally {
                 setLoadingActions(false);
             }
-
-            setLoadingOrgs(true);
-            try {
-                const { data: orgsData, error: orgsError } = await supabase
-                    .from('org_registry')
-                    .select('*')
-                    .order('legal_name'); // Changed from 'name' to 'legal_name' based on schema
-                
-                if (orgsError) {
-                    console.error('Wizard: Error fetching orgs:', orgsError);
-                } else {
-                    if (orgsData) setOrgs(orgsData);
-                }
-            } catch (err) {
-                console.error('Wizard: Failed to load orgs:', err);
-            } finally {
-                setLoadingOrgs(false);
-            }
+            loadOrgs();
         }
         load();
     }, []);
+
+    const handleQuickAdd = async () => {
+        if (!quickAddForm.legal_name) return;
+        setQuickAddLoading(true);
+        const { data, error } = await supabase
+            .from('org_registry')
+            .insert([quickAddForm])
+            .select()
+            .single();
+
+        if (!error && data) {
+            setOrgs(prev => [...prev, data].sort((a,b) => a.legal_name.localeCompare(b.legal_name)));
+            setForm(f => ({...f, selectedOrgs: [...f.selectedOrgs, data.id]}));
+            setQuickAddForm({ legal_name: '', oid: '', pic: '', country: '', type: 'NGO' });
+            setShowQuickAdd(false);
+        } else if (error) {
+            alert(error.message);
+        }
+        setQuickAddLoading(false);
+    };
 
     const grouped = actions.reduce((acc, a) => {
         if (!acc[a.key_action]) acc[a.key_action] = [];
@@ -314,10 +336,85 @@ export default function NewProposalWizard() {
                             {/* Step 3: Partners */}
                             {step === 3 && (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                                    <div className="text-center max-w-lg mx-auto mb-10">
-                                        <h2 className="text-3xl font-black text-gray-900 mb-2">Build Partnership</h2>
-                                        <p className="text-gray-500">Select organisations from your registry to participate in this proposal.</p>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Registered Partners</h4>
+                                        <button 
+                                            onClick={() => setShowQuickAdd(!showQuickAdd)}
+                                            className="text-[10px] font-black text-blue-600 hover:text-blue-700 flex items-center gap-1 uppercase tracking-tight transition-all"
+                                        >
+                                            {showQuickAdd ? <X size={12} /> : <Plus size={12} />}
+                                            {showQuickAdd ? 'Close Form' : 'Quick Add Partner'}
+                                        </button>
                                     </div>
+
+                                    {showQuickAdd && (
+                                        <div className="mb-6 p-6 bg-blue-50/30 border border-blue-100 rounded-[2rem] space-y-4 animate-in slide-in-from-top-4 duration-300">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-[9px] font-black text-blue-900/40 uppercase tracking-widest mb-1.5 px-1">Legal Name</label>
+                                                    <input 
+                                                        type="text"
+                                                        placeholder="Organisation Name..."
+                                                        className="w-full px-4 py-3 bg-white border border-blue-100 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-sm"
+                                                        value={quickAddForm.legal_name}
+                                                        onChange={e => setQuickAddForm({...quickAddForm, legal_name: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-1.5 px-1">
+                                                        <label className="block text-[9px] font-black text-blue-900/40 uppercase tracking-widest">OID</label>
+                                                        {quickAddForm.oid && (
+                                                            <a href="https://webgate.ec.europa.eu/erasmus-esc/index/organisations/search-for-an-organisation" target="_blank" className="text-[8px] font-black text-blue-600 hover:underline uppercase">Verify ↗</a>
+                                                        )}
+                                                    </div>
+                                                    <div className="relative">
+                                                        <input 
+                                                            type="text"
+                                                            placeholder="E12345678"
+                                                            className={`w-full pl-4 pr-10 py-3 bg-white border rounded-xl focus:ring-4 outline-none transition-all font-bold text-sm ${quickAddForm.oid ? (isOidValid ? 'border-emerald-200 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-red-200 focus:ring-red-500/10 focus:border-red-500') : 'border-blue-100 focus:ring-blue-500/10 focus:border-blue-500'}`}
+                                                            value={quickAddForm.oid}
+                                                            onChange={e => setQuickAddForm({...quickAddForm, oid: e.target.value.toUpperCase()})}
+                                                        />
+                                                        {quickAddForm.oid && (
+                                                            <div className="absolute right-3 top-3">
+                                                                {isOidValid ? <CheckCircle2 size={16} className="text-emerald-500" /> : <AlertCircle size={16} className="text-red-500" />}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-1.5 px-1">
+                                                        <label className="block text-[9px] font-black text-blue-900/40 uppercase tracking-widest">PIC</label>
+                                                        {quickAddForm.pic && isPicValid && (
+                                                            <a href={`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/how-to-participate/org-details/${quickAddForm.pic}`} target="_blank" className="text-[8px] font-black text-blue-600 hover:underline uppercase">Verify ↗</a>
+                                                        )}
+                                                    </div>
+                                                    <div className="relative">
+                                                        <input 
+                                                            type="text"
+                                                            placeholder="9 digits"
+                                                            className={`w-full pl-4 pr-10 py-3 bg-white border rounded-xl focus:ring-4 outline-none transition-all font-bold text-sm ${quickAddForm.pic ? (isPicValid ? 'border-emerald-200 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-red-200 focus:ring-red-500/10 focus:border-red-500') : 'border-blue-100 focus:ring-blue-500/10 focus:border-blue-500'}`}
+                                                            value={quickAddForm.pic}
+                                                            onChange={e => setQuickAddForm({...quickAddForm, pic: e.target.value.replace(/\D/g, '').slice(0, 9)})}
+                                                        />
+                                                        {quickAddForm.pic && (
+                                                            <div className="absolute right-3 top-3">
+                                                                {isPicValid ? <CheckCircle2 size={16} className="text-emerald-500" /> : <AlertCircle size={16} className="text-red-500" />}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button 
+                                                onClick={handleQuickAdd}
+                                                disabled={quickAddLoading || !quickAddForm.legal_name}
+                                                className="w-full py-3 bg-blue-600 text-white rounded-xl font-black text-xs shadow-lg shadow-blue-600/20 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                {quickAddLoading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                                                Register Partner & Select
+                                            </button>
+                                        </div>
+                                    )}
 
                                     <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                                         {loadingOrgs ? (
@@ -334,11 +431,11 @@ export default function NewProposalWizard() {
                                                         }}
                                                         className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all group ${isSelected ? 'border-blue-600 bg-blue-50/50' : 'border-gray-50 bg-gray-50/30 hover:border-blue-100'}`}>
                                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm transition-colors ${isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-400 border border-gray-100'}`}>
-                                                            {org.name[0].toUpperCase()}
+                                                            {org.legal_name[0]?.toUpperCase()}
                                                         </div>
                                                         <div className="flex-1 text-left">
                                                             <p className="text-sm font-black text-gray-900">{org.legal_name}</p>
-                                                            <p className="text-[10px] font-bold text-gray-400 mt-0.5">{org.country} • {org.oid || 'No OID'}</p>
+                                                            <p className="text-[10px] font-bold text-gray-400 mt-0.5">{org.country || 'No Country'} • {org.oid || 'No OID'}</p>
                                                         </div>
                                                         {isSelected && <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white"><Check size={14} /></div>}
                                                     </button>
@@ -347,7 +444,7 @@ export default function NewProposalWizard() {
                                         ) : (
                                             <div className="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
                                                 <p className="text-sm font-bold text-gray-400">Registry is empty</p>
-                                                <Link href="/organisations/new" className="text-xs text-blue-600 font-black hover:underline mt-2 inline-block">Add first organisation →</Link>
+                                                <button onClick={() => setShowQuickAdd(true)} className="text-xs text-blue-600 font-black hover:underline mt-2 inline-block">Add first organisation →</button>
                                             </div>
                                         )}
                                     </div>

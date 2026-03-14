@@ -20,6 +20,7 @@ export default function NewOrganisationPage() {
 
     const [form, setForm] = useState({
         oid: '',
+        pic: '',
         legal_name: '',
         type: 'NGO',
         country: '',
@@ -29,36 +30,13 @@ export default function NewOrganisationPage() {
         address: ''
     });
 
-    // Mock OID lookup (In a real app, this would call an Erasmus+ API wrapper)
-    const handleOidLookup = async () => {
-        if (!searchQuery) return;
-        setSearchingOid(true);
-        setError(null);
+    const oidRegex = /^E\d{8}$/;
+    const picRegex = /^\d{9}$/;
+    const isOidValid = oidRegex.test(form.oid);
+    const isPicValid = picRegex.test(form.pic);
 
-        // Simulate API delay
-        await new Promise(r => setTimeout(r, 1500));
-
-        // Logic for OID lookup. Normally we'd fetch from EC API.
-        // For now, if OID is provided, we simulate a find.
-        if (searchQuery.length < 8) {
-            setError("OID must be at least 8 characters starting with 'E'");
-            setSearchingOid(false);
-            return;
-        }
-
-        // Just pre-fill with some data to demonstrate the flow
-        setForm(f => ({
-            ...f,
-            oid: searchQuery,
-            legal_name: "Mock Organisation (Found via OID)",
-            country: "Turkey",
-            city: "Ankara",
-            type: "NGO",
-            email: "info@mockorg.com",
-            website: "https://mockorg.com"
-        }));
-        
-        setSearchingOid(false);
+    const handleSearchEC = () => {
+        window.open('https://webgate.ec.europa.eu/erasmus-esc/index/organisations/search-for-an-organisation', '_blank');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -95,33 +73,25 @@ export default function NewOrganisationPage() {
                             <p className="text-gray-500">Search by OID or enter details manually to add to your registry.</p>
                         </div>
 
-                        {/* OID Lookup Tool */}
+                        {/* External Lookup Tool */}
                         <div className="bg-amber-500/5 border border-amber-500/10 rounded-[2rem] p-8 mb-8">
-                            <h4 className="flex items-center gap-2 text-amber-700 font-black text-sm uppercase tracking-wider mb-4">
-                                <Search size={16} /> OID Lookup (Recommended)
-                            </h4>
-                            <div className="flex gap-3">
-                                <div className="relative flex-1">
-                                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500/50" size={18} />
-                                    <input 
-                                        type="text"
-                                        placeholder="Enter OID (e.g. E10208833)..."
-                                        className="w-full pl-12 pr-4 py-4 bg-white border border-amber-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all text-sm font-bold"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value.toUpperCase())}
-                                    />
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex-1">
+                                    <h4 className="flex items-center gap-2 text-amber-700 font-black text-sm uppercase tracking-wider mb-2">
+                                        <Search size={16} /> Official EC Database
+                                    </h4>
+                                    <p className="text-[10px] text-amber-600 font-bold max-w-sm">
+                                        Search the official EC database, find your partner, then copy their OID and PIC back here.
+                                    </p>
                                 </div>
                                 <button 
-                                    onClick={handleOidLookup}
-                                    disabled={searchingOid || !searchQuery}
-                                    className="px-8 py-4 bg-amber-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-amber-500/20 active:scale-95 disabled:opacity-50 transition-all flex items-center gap-2">
-                                    {searchingOid ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
-                                    Lookup
+                                    type="button"
+                                    onClick={handleSearchEC}
+                                    title="Search the official EC database, then copy the OID back here"
+                                    className="px-8 py-4 bg-amber-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-amber-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                    <Globe size={18} />
+                                    Search EC Database ↗
                                 </button>
-                            </div>
-                            <div className="mt-4 flex items-start gap-2 text-[10px] text-amber-600 font-bold bg-white/50 p-3 rounded-xl border border-amber-100/50">
-                                <Info size={14} className="shrink-0" />
-                                <p>Lookup pre-fills details from the official Erasmus+ Database. You can still edit them before saving.</p>
                             </div>
                         </div>
 
@@ -160,17 +130,69 @@ export default function NewOrganisationPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">OID (Organisation ID)</label>
+                                    <div className="flex items-center justify-between px-1 mb-2">
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">OID (Organisation ID)</label>
+                                        {form.oid && (
+                                            <a 
+                                                href="https://webgate.ec.europa.eu/erasmus-esc/index/organisations/search-for-an-organisation"
+                                                target="_blank"
+                                                className="text-[9px] font-black text-blue-600 hover:underline uppercase tracking-tighter"
+                                            >
+                                                Verify on EC website ↗
+                                            </a>
+                                        )}
+                                    </div>
                                     <div className="relative">
-                                        <Hash className="absolute left-4 top-4 text-gray-300" size={18} />
+                                        <Hash className={`absolute left-4 top-4 transition-colors ${form.oid ? (isOidValid ? 'text-emerald-500' : 'text-red-500') : 'text-gray-300'}`} size={18} />
                                         <input 
                                             type="text"
-                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-bold text-gray-900"
+                                            className={`w-full pl-12 pr-12 py-4 bg-gray-50 border rounded-2xl focus:bg-white focus:ring-4 outline-none transition-all font-bold text-gray-900 ${form.oid ? (isOidValid ? 'border-emerald-100 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-red-100 focus:ring-red-500/10 focus:border-red-500') : 'border-gray-100 focus:ring-indigo-500/10 focus:border-indigo-500'}`}
                                             placeholder="E12345678"
                                             value={form.oid}
                                             onChange={e => setForm({...form, oid: e.target.value.toUpperCase()})}
                                         />
+                                        {form.oid && (
+                                            <div className="absolute right-4 top-4">
+                                                {isOidValid ? <CheckCircle2 size={18} className="text-emerald-500" /> : <AlertCircle size={18} className="text-red-500" />}
+                                            </div>
+                                        )}
                                     </div>
+                                    <p className="mt-2 px-1 text-[9px] text-gray-400 font-medium leading-relaxed">
+                                        Format E12345678. Find it at webgate.ec.europa.eu or ask your coordinator.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center justify-between px-1 mb-2">
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">PIC Number</label>
+                                        {form.pic && isPicValid && (
+                                            <a 
+                                                href={`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/how-to-participate/org-details/${form.pic}`}
+                                                target="_blank"
+                                                className="text-[9px] font-black text-blue-600 hover:underline uppercase tracking-tighter"
+                                            >
+                                                Verify on EC website ↗
+                                            </a>
+                                        )}
+                                    </div>
+                                    <div className="relative">
+                                        <Hash className={`absolute left-4 top-4 transition-colors ${form.pic ? (isPicValid ? 'text-emerald-500' : 'text-red-500') : 'text-gray-300'}`} size={18} />
+                                        <input 
+                                            type="text"
+                                            className={`w-full pl-12 pr-12 py-4 bg-gray-50 border rounded-2xl focus:bg-white focus:ring-4 outline-none transition-all font-bold text-gray-900 ${form.pic ? (isPicValid ? 'border-emerald-100 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-red-100 focus:ring-red-500/10 focus:border-red-500') : 'border-gray-100 focus:ring-indigo-500/10 focus:border-indigo-500'}`}
+                                            placeholder="9 digits (e.g. 949123456)"
+                                            value={form.pic}
+                                            onChange={e => setForm({...form, pic: e.target.value.replace(/\D/g, '').slice(0, 9)})}
+                                        />
+                                        {form.pic && (
+                                            <div className="absolute right-4 top-4">
+                                                {isPicValid ? <CheckCircle2 size={18} className="text-emerald-500" /> : <AlertCircle size={18} className="text-red-500" />}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="mt-2 px-1 text-[9px] text-gray-400 font-medium leading-relaxed">
+                                        9 digits, no letters. Required for some Erasmus+ and Horizon programs.
+                                    </p>
                                 </div>
 
                                 <div>
