@@ -73,13 +73,31 @@ export default function NewProjectPage() {
     const partnerCount = watch('partnerCount');
 
     useEffect(() => {
-        supabase
-            .from('erasmus_actions')
-            .select('code, name_en, key_action, managing_body, deadline_round1, deadline_round2, min_partners, min_countries, budget_type, budget_options, min_budget_eur, max_budget_eur, requires_eche, requires_accreditation, funding_rate_pct')
-            .eq('year', 2026)
-            .order('key_action')
-            .order('code')
-            .then(({ data }) => setErasmusActions(data || []));
+        async function loadActions() {
+            setIsLoadingActions(true);
+            try {
+                console.log('Project: Fetching Erasmus actions for 2026...');
+                const { data, error } = await supabase
+                    .from('erasmus_actions')
+                    .select('code, name_en, key_action, managing_body, deadline_round1, deadline_round2, min_partners, min_countries, budget_type, budget_options, min_budget_eur, max_budget_eur, requires_eche, requires_accreditation, funding_rate_pct')
+                    .eq('year', 2026)
+                    .order('key_action')
+                    .order('code');
+                
+                if (error) {
+                    console.error('Project: Error fetching actions:', error);
+                    trackError(error, { context: 'fetch_actions_project' });
+                } else {
+                    console.log(`Project: Fetched ${data?.length || 0} actions:`, data);
+                    setErasmusActions(data || []);
+                }
+            } catch (err) {
+                console.error('Project: Failed to load actions:', err);
+            } finally {
+                setIsLoadingActions(false);
+            }
+        }
+        loadActions();
     }, []);
 
     const grouped = useMemo(() => erasmusActions.reduce((acc, a) => {

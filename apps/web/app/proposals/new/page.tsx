@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createSupabaseBrowserClient } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
+import { trackEvent, trackError } from '../../lib/analytics';
 import { Sidebar } from '../../components/Sidebar';
 import { Header } from '../../components/Header';
 import { 
@@ -20,7 +21,7 @@ const STEPS = [
 
 export default function NewProposalWizard() {
     const router = useRouter();
-    const supabase = createSupabaseBrowserClient();
+    // Use the standard supabase client as in other functional components
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [actions, setActions] = useState<any[]>([]);
@@ -41,24 +42,60 @@ export default function NewProposalWizard() {
     useEffect(() => {
         async function load() {
             setLoadingActions(true);
-            const { data: actionsData } = await supabase
-                .from('erasmus_actions')
-                .select('*')
-                .eq('year', 2026)
-                .order('code');
-            if (actionsData) setActions(actionsData);
-            setLoadingActions(false);
+            try {
+                console.log('Wizard: Fetching Erasmus actions for 2026...');
+                const { data: actionsData, error: actionsError } = await supabase
+                    .from('erasmus_actions')
+                    .select('*')
+                    .eq('year', 2026)
+                    .order('code');
+                
+                if (actionsError) {
+                    console.error('Wizard: Error fetching actions:', actionsError);
+                    trackError(actionsError, { context: 'fetch_actions_wizard' });
+                } else {
+                    console.log(`Wizard: Fetched ${actionsData?.length || 0} actions:`, actionsData);
+                    if (actionsData) setActions(actionsData);
+                }
+            } catch (err) {
+                console.error('Wizard: Failed to load actions:', err);
+            } finally {
+                setLoadingActions(false);
+            }
 
             setLoadingOrgs(true);
-            const { data: orgsData } = await supabase
-                .from('org_registry')
-                .select('*')
-                .order('name');
-            if (orgsData) setOrgs(orgsData);
-            setLoadingOrgs(false);
+            try {
+                const { data: orgsData, error: orgsError } = await supabase
+                    .from('org_registry')
+                    .select('*')
+                    .order('legal_name'); // Changed from 'name' to 'legal_name' based on schema
+                
+                if (orgsError) {
+                    console.error('Wizard: Error fetching orgs:', orgsError);
+                } else {
+                    if (orgsData) setOrgs(orgsData);
+                }
+            } catch (err) {
+                console.error('Wizard: Failed to load orgs:', err);
+            } finally {
+                setLoadingOrgs(false);
+            }
         }
         load();
     }, []);
+
+    const grouped = actions.reduce((acc, a) => {
+        if (!acc[a.key_action]) acc[a.key_action] = [];
+        acc[a.key_action].push(a);
+        return acc;
+    }, {} as Record<string, any[]>);
+
+    const KA_LABELS: Record<string, string> = {
+        KA1: 'KA1 — Learning Mobility',
+        KA2: 'KA2 — Cooperation', 
+        KA3: 'KA3 — Policy Support',
+        JM:  'Jean Monnet',
+    };
 
     const selectedAction = actions.find(a => a.code === form.action_code);
 
@@ -90,10 +127,14 @@ export default function NewProposalWizard() {
         if (form.selectedOrgs.length > 0) {
             const orgLinks = form.selectedOrgs.map(orgId => ({
                 proposal_id: proposal.id,
-                org_id: orgId,
+                org_registry_id: orgId,
                 role: 'partner' // Default role
             }));
-            await supabase.from('proposal_organisations').insert(orgLinks);
+            const { error: oError } = await supabase.from('proposal_orgs').insert(orgLinks);
+            if (oError) {
+                console.error('Wizard: Error linking orgs:', oError);
+                // We don't block the whole process if org linking fails, but we log it
+            }
         }
 
         router.push(`/proposals/${proposal.id}`);
@@ -156,21 +197,47 @@ export default function NewProposalWizard() {
                                             <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Loading actions...</p>
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                                            {actions.map(action => (
-                                                <button 
-                                                    key={action.code}
-                                                    onClick={() => setForm({...form, action_code: action.code})}
-                                                    className={`p-5 rounded-2xl border-2 text-left transition-all group ${form.action_code === action.code ? 'border-blue-600 bg-blue-50/50' : 'border-gray-50 bg-gray-50/30 hover:border-blue-100 hover:bg-white'}`}>
-                                                    <div className="flex items-start justify-between mb-3">
-                                                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg border ${form.action_code === action.code ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-500 border-blue-100'}`}>
-                                                            {action.code}
+                                        <div className="space-y-10 max-h-[500px] overflow-y-auto pr-4 custom-scrollbar">
+                                            {Object.entries(grouped).map(([ka, acts]: any) => (
+                                                <div key={ka} className="space-y-4">
+                                                    <div className="flex items-center gap-3 ml-2">
+                                                        <div className="h-px flex-1 bg-gray-100" />
+                                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                                            {KA_LABELS[ka] || ka}
                                                         </span>
-                                                        {form.action_code === action.code && <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white"><Check size={12} /></div>}
+                                                        <div className="h-px flex-1 bg-gray-100" />
                                                     </div>
-                                                    <p className="text-sm font-black text-gray-900 line-clamp-2">{action.name_en}</p>
-                                                    <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-tight">{action.key_action} • {action.managing_body}</p>
-                                                </button>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        {acts.map((action: any) => (
+                                                            <button 
+                                                                key={action.code}
+                                                                onClick={() => setForm({...form, action_code: action.code})}
+                                                                className={`p-5 rounded-2xl border-2 text-left transition-all group relative overflow-hidden ${form.action_code === action.code ? 'border-blue-600 bg-blue-50/50' : 'border-gray-50 bg-gray-50/30 hover:border-blue-100 hover:bg-white'}`}>
+                                                                <div className="flex items-start justify-between mb-3 relative z-10">
+                                                                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border shadow-sm transition-all ${form.action_code === action.code ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-100 group-hover:border-blue-200'}`}>
+                                                                        {action.code}
+                                                                    </span>
+                                                                    {form.action_code === action.code && (
+                                                                        <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white animate-in zoom-in-50 duration-300">
+                                                                            <Check size={12} strokeWidth={4} />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <p className="text-sm font-black text-gray-900 line-clamp-2 relative z-10 leading-snug">{action.name_en}</p>
+                                                                <div className="mt-3 flex items-center gap-2 relative z-10">
+                                                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-tight bg-gray-100/50 px-1.5 py-0.5 rounded">
+                                                                        {action.managing_body}
+                                                                    </span>
+                                                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-tight bg-gray-100/50 px-1.5 py-0.5 rounded">
+                                                                       {action.budget_type?.replace('_', ' ')}
+                                                                    </span>
+                                                                </div>
+                                                                {/* Interactive hover background */}
+                                                                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-blue-50/0 group-hover:from-blue-50/40 group-hover:to-transparent transition-all duration-500" />
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             ))}
                                         </div>
                                     )}
@@ -270,7 +337,7 @@ export default function NewProposalWizard() {
                                                             {org.name[0].toUpperCase()}
                                                         </div>
                                                         <div className="flex-1 text-left">
-                                                            <p className="text-sm font-black text-gray-900">{org.name}</p>
+                                                            <p className="text-sm font-black text-gray-900">{org.legal_name}</p>
                                                             <p className="text-[10px] font-bold text-gray-400 mt-0.5">{org.country} • {org.oid || 'No OID'}</p>
                                                         </div>
                                                         {isSelected && <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white"><Check size={14} /></div>}

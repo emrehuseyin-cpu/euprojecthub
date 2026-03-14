@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { createSupabaseBrowserClient } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
 import { Building, Plus, Globe, Search, Filter, Loader2, MapPin, Mail, Hash, ExternalLink, Trash2 } from 'lucide-react';
@@ -12,7 +12,7 @@ import { useAuth } from '../lib/AuthContext';
 type Organisation = {
     id: string;
     oid: string | null;
-    name: string;
+    legal_name: string;
     country: string | null;
     city: string | null;
     type: string | null;
@@ -25,16 +25,15 @@ export default function OrganisationRegistryPage() {
     const [orgs, setOrgs] = useState<Organisation[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const supabase = createSupabaseBrowserClient();
-    const { t } = useLanguage();
     const { role } = useAuth();
+    // Use the standard supabase client as in other functional components
 
     async function loadOrgs() {
         setLoading(true);
         const { data, error } = await supabase
             .from('org_registry')
             .select('*')
-            .order('name', { ascending: true });
+            .order('legal_name', { ascending: true });
         
         if (data) setOrgs(data);
         setLoading(false);
@@ -45,7 +44,7 @@ export default function OrganisationRegistryPage() {
     }, []);
 
     const filteredOrgs = orgs.filter(o => 
-        o.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        o.legal_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
         o.oid?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         o.country?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -124,7 +123,7 @@ export default function OrganisationRegistryPage() {
                                         <div className="p-6 flex-1">
                                             <div className="flex items-start justify-between mb-5">
                                                 <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 font-black text-xl group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300">
-                                                    {org.name[0]?.toUpperCase()}
+                                                    {org.legal_name[0]?.toUpperCase()}
                                                 </div>
                                                 <div className="flex flex-col items-end gap-2">
                                                     {org.oid && (
@@ -141,7 +140,7 @@ export default function OrganisationRegistryPage() {
                                             </div>
 
                                             <h3 className="text-lg font-black text-gray-900 leading-tight mb-2 group-hover:text-amber-600 transition-colors">
-                                                {org.name}
+                                                {org.legal_name}
                                             </h3>
 
                                             <div className="space-y-2.5 mb-6">
@@ -170,7 +169,7 @@ export default function OrganisationRegistryPage() {
                                                 View Details
                                             </Link>
                                             <button 
-                                                onClick={() => handleDelete(org.id, org.name)}
+                                                onClick={() => handleDelete(org.id, org.legal_name)}
                                                 className="w-10 h-10 flex items-center justify-center text-red-400 bg-white border border-red-100 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all">
                                                 <Trash2 size={16} />
                                             </button>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createSupabaseBrowserClient } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { Sidebar } from '../../components/Sidebar';
 import { Header } from '../../components/Header';
 import { Building, ArrowLeft, Search, Loader2, CheckCircle2, AlertCircle, Save, X, Globe, MapPin, Mail, Hash, Info } from 'lucide-react';
@@ -10,8 +10,8 @@ import { useLanguage } from '../../lib/i18n';
 
 export default function NewOrganisationPage() {
     const router = useRouter();
-    const supabase = createSupabaseBrowserClient();
     const { t } = useLanguage();
+    // Use the standard supabase client as in other functional components
 
     const [loading, setLoading] = useState(false);
     const [searchingOid, setSearchingOid] = useState(false);
@@ -20,7 +20,7 @@ export default function NewOrganisationPage() {
 
     const [form, setForm] = useState({
         oid: '',
-        name: '',
+        legal_name: '',
         type: 'NGO',
         country: '',
         city: '',
@@ -50,7 +50,7 @@ export default function NewOrganisationPage() {
         setForm(f => ({
             ...f,
             oid: searchQuery,
-            name: "Mock Organisation (Found via OID)",
+            legal_name: "Mock Organisation (Found via OID)",
             country: "Turkey",
             city: "Ankara",
             type: "NGO",
@@ -137,8 +137,8 @@ export default function NewOrganisationPage() {
                                             type="text"
                                             className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-bold text-gray-900"
                                             placeholder="National Agency / Association Name..."
-                                            value={form.name}
-                                            onChange={e => setForm({...form, name: e.target.value})}
+                                            value={form.legal_name}
+                                            onChange={e => setForm({...form, legal_name: e.target.value})}
                                         />
                                     </div>
                                 </div>
@@ -255,7 +255,7 @@ export default function NewOrganisationPage() {
                                 </button>
                                 <button 
                                     type="submit"
-                                    disabled={loading || !form.name}
+                                    disabled={loading || !form.legal_name}
                                     className="flex-[2] py-4 bg-gray-900 text-white rounded-2xl font-black text-sm shadow-xl shadow-gray-900/10 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
                                     {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                                     Save Organisation
